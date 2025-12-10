@@ -1,33 +1,22 @@
 function validateForm() {
-    // Werte aus den Eingabefeldern holen
+    console.log("Form validation läuft!");
+
     let email = document.getElementById("email").value;
     let password = document.getElementById("password").value;
 
-    // Validierung: E-Mail muss mindestens 5 Zeichen haben und ein @ enthalten
+    // Validierung: E-Mail prüfen
     if (email.length < 5 || !email.includes("@")) {
-        alert("Please enter a valid email!"); // Hinweis auf Englisch
-        return false; // Formular wird nicht abgeschickt
+        alert("Please enter a valid email!");
+        return false;
     }
 
-    // Validierung: Passwort muss mindestens 9 Zeichen haben,
-    // mindestens einen Großbuchstaben, einen Kleinbuchstaben und eine Zahl
+    // Validierung: Passwort prüfen
     let regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{9,}$/;
     if (!regex.test(password)) {
         alert("Password must be at least 9 characters long and contain uppercase, lowercase, and a number!");
         return false;
     }
 
-    // SHA512-Hash erzeugen
-    let shaObj = new jsSHA("SHA-512", "TEXT");
-    shaObj.update(password);
-    let hash = shaObj.getHash("HEX");
-
-    // Hash ins versteckte Feld schreiben
-    document.getElementById("hashedPassword").value = hash;
-
-    // Passwort-Feld leeren, damit Klartext nicht übertragen wird
-    document.getElementById("password").value = "";
-
-    // true = Formular darf abgeschickt werden
-    return true;
+    // Kein Hashing hier mehr!
+    return true; // Formular darf abgeschickt werden
 }

@@ -6,4 +6,12 @@
 - Data → Datenbankverbindung + SQL-Skript für Wiederaufbau.
 - Einfach → nur drei Hauptordner, leicht zu navigieren.
 
+
+
+ <!-- Damit Login funktioniert, muss:
+- Hash mit der Datenbank vergleicht (kunden.passwort).
+- Den 2FA-Code mit dem Secret prüft (Google Authenticator).
+- Bei Erfolg: Session starten, Punkte +5 vergeben, Logs schreiben.
+- Bei Fehler: Meldung „Login fehlgeschlagen“ oder „Ungültiger 2FA-Code“. -!>
 </p>
+

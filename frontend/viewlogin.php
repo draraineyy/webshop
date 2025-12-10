@@ -3,10 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Login with 2FA</title>
-  <!-- Einbindung der jsSHA-Bibliothek, um Passwörter clientseitig mit SHA512 zu hashen -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsSHA/2.4.2/sha512.min.js"></script>
-  <!-- Externe JS-Datei -->
-  <script src="frontend/js/login.js" defer></script>
+  
 </head>
 <body>
   <h2>Login</h2>
@@ -34,5 +31,35 @@
     <!-- Button zum Abschicken -->
     <button type="submit">Login</button>
   </form>
+ 
+
+<script>
+function validateForm() {
+    console.log("Form validation läuft!");
+
+    let email = document.getElementById("email").value;
+    let password = document.getElementById("password").value;
+
+    // Validierung: E-Mail prüfen
+    if (email.length < 5 || !email.includes("@")) {
+        alert("Please enter a valid email!");
+        return false;
+    }
+
+    // Validierung: Passwort prüfen
+    let regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{9,}$/;
+    if (!regex.test(password)) {
+        alert("Password must be at least 9 characters long and contain uppercase, lowercase, and a number!");
+        return false;
+    }
+
+    // Kein Hashing hier mehr!
+    return true; // Formular darf abgeschickt werden
+}
+
+</script>
+
 </body>
+
+
 </html>
