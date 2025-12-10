@@ -9,8 +9,6 @@ CREATE TABLE `cart_position` (
   cart_id INT NOT NULL,
   product_id INT NOT NULL,
   quantity INT NOT NULL,
-  price DECIMAL(10,2) NOT NULL, -- bereits inkl. Rabatt
-  discount DECIMAL (10,2),
   FOREIGN KEY (cart_id) REFERENCES cart(id)
     ON DELETE CASCADE
     ON UPDATE CASCADE,
