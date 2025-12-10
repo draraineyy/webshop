@@ -1,4 +1,3 @@
-
 function validateForm() {
     // Werte aus den Eingabefeldern holen
     let email = document.getElementById("email").value;
@@ -6,7 +5,7 @@ function validateForm() {
 
     // Validierung: E-Mail muss mindestens 5 Zeichen haben und ein @ enthalten
     if (email.length < 5 || !email.includes("@")) {
-        alert("Bitte gültige E-Mail eingeben!");
+        alert("Please enter a valid email!"); // Hinweis auf Englisch
         return false; // Formular wird nicht abgeschickt
     }
 
@@ -14,7 +13,7 @@ function validateForm() {
     // mindestens einen Großbuchstaben, einen Kleinbuchstaben und eine Zahl
     let regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{9,}$/;
     if (!regex.test(password)) {
-        alert("Passwort muss mind. 9 Zeichen, Groß-, Kleinbuchstaben und Zahl enthalten!");
+        alert("Password must be at least 9 characters long and contain uppercase, lowercase, and a number!");
         return false;
     }
 
