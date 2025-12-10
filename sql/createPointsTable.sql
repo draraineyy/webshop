@@ -12,4 +12,5 @@ CREATE TABLE `points` (
   date DATETIME NOT NULL,
   FOREIGN KEY (customer_id) REFERENCES customer(id)
     ON DELETE CASCADE
+    ON UPDATE CASCADE
 ) ENGINE=InnoDB;
