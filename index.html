@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <title>PosterShop - Homepage</title>
+
   <!-- Bootstrap CSS einbinden -->
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Font Awesome für Warenkorb-Icon -->
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
@@ -44,36 +46,69 @@
     <p>You were last online on <span id="lastLogin">Date</span>.</p>
   </div>
 
+  <!-- Logout-Meldung  -->
+  <div id="logout-message"></div>
+
+    <script>
+    // URL-Parameter auslesen
+    const params = new URLSearchParams(window.location.search);
+
+    // Prüfen, ob logout=1 gesetzt ist
+    if (params.has("logout")) {
+      document.getElementById("logout-message").innerHTML =
+        "<p style='color:green'>You have been successfully logged out.</p>";
+    }
+  </script>
+
+
   <!-- Bootstrap Karussell -->
-  <div id="carouselExampleIndicators" class="carousel slide container mt-4" data-bs-ride="carousel">
-    <div class="carousel-indicators">
-      <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active"></button>
-      <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1"></button>
-      <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2"></button>
-    </div>
-    <div class="carousel-inner">
-      <div class="carousel-item active">
-        <img src="images/poster1.jpg" class="d-block w-100" alt="Poster 1">
-      </div>
-      <div class="carousel-item">
-        <img src="images/poster2.jpg" class="d-block w-100" alt="Poster 2">
-      </div>
-      <div class="carousel-item">
-        <img src="images/poster3.jpg" class="d-block w-100" alt="Poster 3">
-      </div>
-    </div>
-    <!-- Buttons zum Wechseln der Bilder -->
-    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
-      <span class="carousel-control-prev-icon"></span>
-    </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
-      <span class="carousel-control-next-icon"></span>
-    </button>
+   <div id="posterCarousel" class="carousel slide container mt-4">
+  
+  <!-- Indikatoren -->
+  <div class="carousel-indicators">
+    <button type="button" data-bs-target="#posterCarousel" data-bs-slide-to="0" class="active"></button>
+    <button type="button" data-bs-target="#posterCarousel" data-bs-slide-to="1"></button>
+    <button type="button" data-bs-target="#posterCarousel" data-bs-slide-to="2"></button>
   </div>
+
+  <!-- Bilder -->
+  <div class="carousel-inner">
+    <div class="carousel-item active">
+      <img src="images/tropen.png" class="d-block" alt="Poster 1">
+    </div>
+    <div class="carousel-item">
+      <img src="images/skyline.png" class="d-block" alt="Poster 2">
+    </div>
+    <div class="carousel-item">
+      <img src="images/alpen.png" class="d-block" alt="Poster 3">
+    </div>
+  </div>
+
+  <!-- Pfeile -->
+  <button class="carousel-control-prev" type="button" data-bs-target="#posterCarousel" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Previous</span>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#posterCarousel" data-bs-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Next</span>
+  </button>
+</div>
+
+
 
   <!-- Bootstrap JS einbinden -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
   <!-- Eigene JS-Datei für Warenkorb-Badge -->
   <script src="js/main.js"></script>
+
+  <!-- Bootstrap Carousel manuell starten, damit es automatisch durchläuft und nicht bei alpen.png hängen bleibt-->
+  <script>
+var carouselElement = document.querySelector('#posterCarousel');
+var carousel = new bootstrap.Carousel(carouselElement, {
+  interval: 3000, // 3 Sekunden pro Slide
+  ride: 'carousel'
+});
+</script>
 </body>
 </html>

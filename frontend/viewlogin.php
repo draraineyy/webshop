@@ -11,7 +11,7 @@
   <!-- Login-Formular -->
   <!-- action = wohin die Daten geschickt werden (backend/login.php) -->
   <!-- onsubmit = ruft validateForm() auf, bevor das Formular abgeschickt wird -->
-  <form id="loginForm" method="POST" action="../backend/login.php" onsubmit="return validateForm()">
+  <form id="loginForm" method="POST" action="../backend/login.php" onsubmit="handleLogin(event)">
     
     <!-- Eingabe für E-Mail -->
     <label for="email">Email:</label>
@@ -20,10 +20,10 @@
     <!-- Eingabe für Passwort -->
     <label for="password">Password:</label>
     <input type="password" id="password" name="password" required>
-    
-    <!-- Verstecktes Feld, in das wir den SHA512-Hash schreiben -->
-    <input type="hidden" id="hashedPassword" name="hashedPassword">
 
+    <input type="hidden" id="password_hash" name="password_hash">   <!-- hidden-feld:passwort hash. Darin kommt der Hash aus login.js-->
+
+    
     <!-- Eingabe für den 2FA-Code (6-stellig aus Google Authenticator) -->
     <label for="code">2FA Code:</label>
     <input type="text" id="code" name="code" maxlength="6" required>
@@ -34,28 +34,49 @@
  
 
 <script>
+async function sha512(text) {
+    const buf = await crypto.subtle.digest("SHA-512", new TextEncoder().encode(text));
+    return Array.from(new Uint8Array(buf))
+        .map(b => b.toString(16).padStart(2,"0"))
+        .join("");
+}
+
 function validateForm() {
-    console.log("Form validation läuft!");
+    const email = document.getElementById("email").value;
+    const pw = document.getElementById("password").value;
 
-    let email = document.getElementById("email").value;
-    let password = document.getElementById("password").value;
-
-    // Validierung: E-Mail prüfen
     if (email.length < 5 || !email.includes("@")) {
         alert("Please enter a valid email!");
         return false;
     }
 
-    // Validierung: Passwort prüfen
-    let regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{9,}$/;
-    if (!regex.test(password)) {
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{9,}$/;
+    if (!regex.test(pw)) {
         alert("Password must be at least 9 characters long and contain uppercase, lowercase, and a number!");
         return false;
     }
-
-    // Kein Hashing hier mehr!
-    return true; // Formular darf abgeschickt werden
+    return true;
 }
+
+document.getElementById("loginForm").addEventListener("submit", async function(e){
+    e.preventDefault();
+
+    if (!validateForm()) return; // Validierung vorher
+
+    const pw = document.getElementById("password").value;
+    const hash = await sha512(pw);
+
+    document.getElementById("password_hash").value = hash;
+
+    // Optional: Klartext-Passwort löschen, damit nur Hash gesendet wird
+    document.getElementById("password").value = "";
+
+    // Formular jetzt abschicken
+    e.target.submit();
+});
+
+
+
 
 </script>
 

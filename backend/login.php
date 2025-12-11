@@ -10,26 +10,37 @@ session_start();
 
 require_once("../db.php"); // DB-Verbindung
 
+
+
 $email = $_POST["email"];
-$password = $_POST["password"]; // Klartext kommt an
+$passwordHash = $_POST["password_hash"]; // Hash kommt an
 $code = $_POST["code"];
 
-// Passwort-Hash erzeugen
-$hash = hash("sha512", $password);
+var_dump($email, $passwordHash);
+$stmt = $pdo->prepare("SELECT * FROM customer WHERE email=? AND password_hash=?");
+$stmt->execute([$email, $passwordHash]);
+$user = $stmt->fetch();
+
+if (!$user) {
+    die("User nicht gefunden. Prüfe Email + Hash!");
+}
 
 // User aus DB holen
 $stmt = $pdo->prepare("SELECT * FROM customer WHERE email=? AND password_hash=?");
-$stmt->execute([$email, $hash]);
+$stmt->execute([$email, $passwordHash]);
 $user = $stmt->fetch();
 
 if ($user) {
     // 2FA prüfen
-    require_once("../PHPGangsta/GoogleAuthenticator.php");
+    require_once "PHPGangsta/GoogleAuthenticator.php";
     $ga = new PHPGangsta_GoogleAuthenticator();
     $checkResult = $ga->verifyCode($user["twofacode"], $code, 2);
 
     if ($checkResult) {
-        $_SESSION["user_id"] = $user["id"];
+        $_SESSION["user_id"] = $user["id"];     // Primärschlüssel aus Tabelle
+        $_SESSION["username"] = $user["email"]; // Email oder Name, damit User im Frontend begrüßt wird
+        $_SESSION["time"] = time();             // Zeitpunkt des Logins für "Letzte Login" Anzeige
+
 
 
         // Punkte +5 für Login
@@ -41,6 +52,14 @@ if ($user) {
         $resolution = $_POST["resolution"] ?? "unknown";
         $stmt = $pdo->prepare("INSERT INTO logs (customer_id, login_date, operating_system, aufloesung) VALUES (?, NOW(), ?, ?)");
         $stmt->execute([$user["id"], $os, $resolution]);
+
+
+         // Erweiterung: First-Login prüfen
+        if (!empty($user['must_change_password']) && (int)$user['must_change_password'] === 1) {  // if bedingung: 1. Feld ist nicht leer && 2. Wert ist exakt 1
+            header("Location: ../frontend/first_login.php");
+            exit;
+        }
+
 
         // Redirect ins Benutzerkonto
                 header("Location: ../frontend/account.php");

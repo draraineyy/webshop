@@ -20,3 +20,26 @@ function validateForm() {
     // Kein Hashing hier mehr!
     return true; // Formular darf abgeschickt werden
 }
+
+
+// crypto.subtle.digest erzeugt den SHA‑512‑Hash und setzt ihn ins Hidden‑Feld.
+
+async function sha512(text) {
+  const buf = await crypto.subtle.digest("SHA-512", new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf))
+              .map(b => b.toString(16).padStart(2,"0"))
+              .join("");
+}
+
+async function handleLogin(e) {
+  e.preventDefault();
+
+  const pw = document.getElementById("password").value;
+  const hash = await sha512(pw);   // jetzt wird das echte Passwort gehasht
+  document.getElementById("password_hash").value = hash;
+
+  console.log("Hash gesetzt:", document.getElementById("password_hash").value);
+
+  document.getElementById("password").disabled = true;
+  e.target.submit();
+}
