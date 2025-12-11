@@ -2,7 +2,7 @@
 // db.php - Zentrale Datenbankverbindung
 
 $host = 'localhost';
-$dbname = 'InnoDb';
+$dbname = 'postershop';
 $user = 'root';      // Standard XAMPP User
 $password = '';      // Standard XAMPP Passwort (leer)
 

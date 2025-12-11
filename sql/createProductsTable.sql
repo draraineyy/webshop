@@ -12,3 +12,12 @@ CREATE TABLE `products` (
   picture_path VARCHAR(255) NOT NULL,
   stock INT NOT NULL
 ) ENGINE=InnoDB;
+
+ALTER TABLE products
+  ADD COLUMN number VARCHAR(64) AFTER id;
+
+ALTER TABLE products
+  MODIFY COLUMN number VARCHAR(64) NOT NULL;
+
+ALTER TABLE products
+  ADD UNIQUE KEY products_number(number);
