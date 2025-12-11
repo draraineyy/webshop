@@ -32,7 +32,11 @@ $user = $stmt->fetch();
 
 if ($user) {
     // 2FA prüfen
+<<<<<<< HEAD
     require_once "PHPGangsta/GoogleAuthenticator.php";
+=======
+    require_once("PHPGangsta/GoogleAuthenticator.php");
+>>>>>>> f017d360b1bc19a7326f3c87d7c3d898ef93dc7c
     $ga = new PHPGangsta_GoogleAuthenticator();
     $checkResult = $ga->verifyCode($user["twofacode"], $code, 2);
 
