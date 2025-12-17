@@ -1,8 +1,8 @@
 function validateForm() {
     console.log("Form validation läuft!");
 
-    let email = document.getElementById("email").value;
-    let password = document.getElementById("password").value;
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
 
     // Validierung: E-Mail prüfen
     if (email.length < 5 || !email.includes("@")) {
@@ -11,7 +11,7 @@ function validateForm() {
     }
 
     // Validierung: Passwort prüfen
-    let regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{9,}$/;
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{9,}$/;
     if (!regex.test(password)) {
         alert("Password must be at least 9 characters long and contain uppercase, lowercase, and a number!");
         return false;
@@ -31,15 +31,35 @@ async function sha512(text) {
               .join("");
 }
 
+function detectResolution(){
+  return '${window.screen.width}x${window.screen.height}';
+}
+
+function detectClientOS(){
+  const us=navigator.userAgent||"";
+  if(/Windows/i.test(ua)) return "Windows";
+  if(/Macintosh|Mac OS X/i.test(ua)) return "macOS";
+  if(/Android/i.test(ua)) return "Android";
+  if(/iPhone|iPad|iPod/i.test(ua)) return "iOS";
+  if(/Linux/i.test(ua)) return "Linux";
+  return "Unknown";
+}
+
 async function handleLogin(e) {
   e.preventDefault();
+  if(!validateForm()) return false;
 
   const pw = document.getElementById("password").value;
-  const hash = await sha512(pw);   // jetzt wird das echte Passwort gehasht
-  document.getElementById("password_hash").value = hash;
+  document.getElementById("password_hash").value = await sha512(pw);
+  document.getElementById("resolution").value = detectResolution();
+  document.getElementById("client_os").value=detectClientOS();
 
-  console.log("Hash gesetzt:", document.getElementById("password_hash").value);
+  //const hash = await sha512(pw);   // jetzt wird das echte Passwort gehasht
+  //document.getElementById("password_hash").value = hash;
+
+  //console.log("Hash gesetzt:", document.getElementById("password_hash").value);
 
   document.getElementById("password").disabled = true;
   e.target.submit();
+  return true;
 }

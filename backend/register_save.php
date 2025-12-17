@@ -35,19 +35,39 @@ try{
 
 // Zufallspasswort generieren (10-12 Zeichen, Buchstaben+Zahlen)
 function generateRandomPassword(int $length = 12): string{
-    $alphabet='ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789'; // ohne leicht verwechselbare Zeichen
-    $bytes=random_bytes($length);
-    $out='';
-    for($i=0;$i<$length;$i++){
-        $out .=$alphabet[ord($bytes[$i])% strlen($alphabet)];
+    $upper='ABCDEFGHJKLMNPQRSTUVWXYZ'; // ohne I/O
+    $lower='abcdefghijkmnopqrstuvwxyz'; // ohne l
+    $digits='23456789'; // ohne 0/1
+    $all=$upper .$lower .$digits;
+    // Garantiert je 1 Zeichen aus jeder Klasse:
+    $pwd='';
+    $pwd.=$upper[random_int(0, strlen($upper)-1)];
+    $pwd.=$lower[random_int(0, strlen($lower)-1)];
+    $pwd.=$digits[random_int(0, strlen($digits)-1)];
+    // Rest auffüllen mit kompletter Menge
+    for($i=3; $i<$length; $i++){
+        $pwd.=$all[random_int(0, strlen($all)-1)];
     }
-    return $out;
+    // Sicher durchmischen
+    $pwd=secureShuffle($pwd);
+
+    return $pwd;
+}
+
+function secureShuffle(string $s):string{
+    $arr=str_split($s);
+    for ($i=count($arr)-1; $i>0;$i--){
+        $j=random_int(0, $i);
+        [$arr[$i], $arr[$j]] = [$arr[$j], $arr[$i]];
+    }
+    return implode ('', $arr);
 }
 
 $plainPassword=generateRandomPassword(12);
 
-// SHA-512 Hash erzeugen
-$passwordHash = hash('sha512', $plainPassword);
+//Hash erzeugen
+$algo=defined('PASSWORD_ARGON2ID')?PASSWORD_ARGON2ID:PASSWORD_DEFAULT;
+$passwordHash=password_hash($plainPassword, $algo);
 
 // User anlegen (must_change_password=1, twofacode erst später setzen)
 try{
@@ -62,11 +82,17 @@ try{
     $stmt->execute([$customerId]);
 
     $pdo->commit();
-// } catch(Throwable $e) {
-//    if($pdo->inTransaction()) $pdo->rollBack();
-//    header("Location: ../frontend/register.php?error=server");
-//    exit;
-//}
+
+    $_SESSION['user_id']=$customerId;
+    $_SESSION['username']=$email;
+    $_SESSION['time']=time();
+    $_SESSION['pending_pw_change']=true;
+    session_regenerate_id(true);
+} catch(Throwable $e) {
+    if($pdo->inTransaction()) $pdo->rollBack();
+    header("Location: ../frontend/register.php?error=server");
+    exit;
+}
 
     // E-Mail versenden
     $subject='Dein PosterShop Startpasswort';
@@ -84,14 +110,12 @@ try{
             'email' => $email,
             'password' => $plainPassword
         ];
-        header("Location: ../frontend/register.php?ok=1");
-        exit;   
+        header("Location: ../frontend/register.php?ok=1");   
     }
     else{
-        $error='Die Registrierung war erfolgreich, aber es gab einen Fehler beim Senden der Bestätigungs E-Mail.';
+        header("Location: ../frontend/register.php?ok=1&mail=fail");
     }
-} catch(Throwable $e) {
-    if($pdo->inTransaction()) $pdo->rollBack();
-    header("Location: ../frontend/register.php?error=server");
-    exit;
-}
+
+// Weiter zu first-login
+header("Location: ../frontend/first_login.php");
+exit;
