@@ -94,16 +94,55 @@ try{
     exit;
 }
 
-    // E-Mail versenden
-    $subject='Dein PosterShop Startpasswort';
-    $body="
-        <p>Hallo {$name},</p>
-        <p>Vielen Dank für deine Registrierung beim <strong>PosterShop</strong>.</p>
-        <p>Dein einmaliges Startpasswort lautet: <code>{$plainPassword}</code></p>
-        <p>Bitte melde dich an und ändere es beim ersten Login.</p>
-        ";
+    require_once __DIR__ . '/PHPMailer/src/PHPMailer.php';
+    require_once __DIR__ . '/PHPMailer/src/SMTP.php';
+    require_once __DIR__ . '/PHPMailer/src/Exception.php';
+    use PHPMailer\PHPMailer\PHPMailer;
+    use PHPMailer\PHPMailer\Exception;
 
-    if(sendEmail($email, $subject, $body)){
+    $smtpHost='smtp.gmail.com';
+    $smtpUser='postershop.info@gmail.com';
+    $smtpPass='qznk tsuz ziqg tfyg';
+    $smtpPort=587;
+
+    $mail=new PHPMailer(true);
+    try{
+        $mail->isSMTP();
+        $mail->Host=$smtpHost;
+        $mail->SMTPAuth=true;
+        $mail->Username=$smtpUser;
+        $mail->Password=$smtpPass;
+        $mail->SMTPSecure=PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port=$smtpPort;
+
+        //Absender & Empfänger
+        $mail->setFrom($smtpUser, 'Postershop');
+        $mail->addAddress($email, $name);
+
+        //Inhalt
+        $mail->isHTML(true);
+        $mail->CharSet='UTF-8';
+        $mail->Encoding='base64';
+        $mail->Subject='Deine Registrierung beim PosterShop';
+        $mail->Body=sprintf('
+            <h2>Willkommen, %s!</h2>
+            <p>Vielen Dank für deine Registrierung beim <strong>PosterShop</strong></p>
+            <p>Dein Startpasswort lautet: <strong>%s</strong></p>
+            <p>Bitte melde dich an und ändere es beim ersten Login.</p>',
+            htmlspecialchars($name, ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars($plainPassword, ENT_QUOTES, 'UTF-8')
+        );
+        $mail->AltBody="Willkommen, {name}!\nDein Startpasswort: {$plainPassword}?n Bitte ändere es beim ersten Login.";
+
+        $mail->send();
+    } catch(Exception $e){
+        error_log("register_save: Mailer Error: " .$mail->ErrorInfo);
+        header("Location: ../frontend/register.php?ok=1&mail=fail");
+        exit;
+    }
+
+    // E-Mail versenden
+    /*if(sendEmail($email, $subject, $body)){
         $_SESSION['registration_email'] = [
             'subject' => $subject,
             'body' => $body,
@@ -114,7 +153,7 @@ try{
     }
     else{
         header("Location: ../frontend/register.php?ok=1&mail=fail");
-    }
+    }*/
 
 // Weiter zu first-login
 header("Location: ../frontend/first_login.php");
