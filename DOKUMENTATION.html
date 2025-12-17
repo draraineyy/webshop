@@ -8,10 +8,44 @@
 
 
 
- <!-- Damit Login funktioniert, muss:
+ <h4>Damit Login funktioniert, muss:</h4>
+
 - Hash mit der Datenbank vergleicht (kunden.passwort).
 - Den 2FA-Code mit dem Secret prüft (Google Authenticator).
 - Bei Erfolg: Session starten, Punkte +5 vergeben, Logs schreiben.
-- Bei Fehler: Meldung „Login fehlgeschlagen“ oder „Ungültiger 2FA-Code“. -!>
+- Bei Fehler: Meldung „Login fehlgeschlagen“ oder „Ungültiger 2FA-Code“. 
+
+
+<h4> Business-Logik Warenkorb</h4>
+
+1. Session‑basierter Warenkorb
+- Beim Login wird eine Session gestartet.
+- Warenkorb wird in $_SESSION['cart'] gespeichert.
+- Beim Logout (logout.php) wird die Session zerstört → Warenkorb wird automatisch geleert.
+- Vorteil: kein alter Warenkorb bleibt hängen.
+
+3. Ablauf im Code
+- Login → Session startet, Warenkorb wird initialisiert.
+- Add to Cart → cart.php?action=add&id=123&qty=2 → Cart::add().
+- View Cart → viewcart.php zeigt Inhalte aus $_SESSION['cart'].
+- Checkout → prüft Lagerbestand, berechnet Gesamtsumme.
+- Logout → Session zerstört → Warenkorb gelöscht.
+
+4. Edge Cases
+- Persistenter Warenkorb: Wenn User eingeloggt ist, kannst du den Warenkorb zusätzlich in der DB speichern (user_cart Tabelle). Beim nächsten Login wird er wieder geladen.
+- Gast‑Warenkorb: Ohne Login bleibt der Warenkorb nur in der Session.
+
+Ablauf in Frontend - Controller - Model
+
+- Frontend ruft backend/cart.php?action=add mit product_id und quantity.
+- Controller ruft die Methoden deiner model/cart‑Klasse.
+- Antwort: JSON mit aktuellem Warenkorb.
+- Persistenz: Wenn User eingeloggt ist (customer_id gesetzt), wird zusätzlich saveToDb() aufgerufen.
+
+
+
+
 </p>
+
+
 

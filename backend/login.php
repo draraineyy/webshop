@@ -22,7 +22,6 @@ if(strlen($email)<5||strpos($email, '@')===false||strlen($password)<1){
     exit;
 }
 
-
 //User nur nach E-Mail laden
 $stmt = $pdo->prepare("SELECT id, email, password_hash, must_change_password, twofacode FROM customer WHERE email=?");
 $stmt->execute([$email]);
