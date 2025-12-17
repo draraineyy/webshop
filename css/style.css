@@ -3,18 +3,12 @@
     background-color: #fff;
 }
 
-/* Karussell-Höhe fixieren und Bilder zentrieren */
-.carousel-inner .carousel-item {
-    height: 400px; /* Höhe des Karussells */
-    display: flex;
-    justify-content: center; /* horizontal zentrieren */
-    align-items: center;     /* vertikal zentrieren */
+.carousel-item {
+  height: 400px;
 }
 
-/* Bilder passend skalieren, vollständig sichtbar, nicht schneiden */
-.carousel-inner .carousel-item img {
-    max-height: 100%; /* Bild passt sich der Karussellhöhe an */
-    max-width: 90%;   /* Bild wird nicht zu breit */
-    object-fit: contain; /* Bild vollständig sichtbar, keine Beschneidung */
-    display: block;
+.carousel-item img {
+  max-height: 100%;
+  object-fit: contain;
+  margin: auto;
 }

@@ -24,7 +24,7 @@ $existingSecret=$user['twofacode'];
 
 // Wenn bereits ein Secret existiert zurück, sonst Setup anzeigen!
 if (!empty($existingSecret)){
-    header("Location: account.php?twofa=already");
+    header("Location: viewaccount.php?twofa=already");
     exit;
 }
 

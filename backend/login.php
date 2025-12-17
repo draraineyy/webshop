@@ -85,5 +85,5 @@ $pdo->prepare("INSERT INTO logs (customer_id, login_date, operating_system, aufl
     ->execute([$user["id"], $clientOS, $resolution]);
 
 // Weiter ins Konto
-header("Location: ../frontend/account.php");
+header("Location: ../frontend/viewaccount.php");
 exit;

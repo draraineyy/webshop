@@ -68,51 +68,68 @@
     }
   </script>
 
-  <!-- Bootstrap Karussell -->
-  <div id="posterCarousel" class="carousel slide container mt-4">
-    <!-- Indikatoren -->
-    <div class="carousel-indicators">
-      <button type="button" data-bs-target="#posterCarousel" data-bs-slide-to="0" class="active"></button>
-      <button type="button" data-bs-target="#posterCarousel" data-bs-slide-to="1"></button>
-      <button type="button" data-bs-target="#posterCarousel" data-bs-slide-to="2"></button>
-    </div>
+  
+<!-- Bootstrap Carousel (Fade) -->
+<div class="container mt-4">
+  <div id="posterCarousel"
+       class="carousel slide carousel-fade"
+       data-bs-ride="carousel"
+       data-bs-interval="3000">
 
-    <!-- Bilder -->
     <div class="carousel-inner">
+
       <div class="carousel-item active">
-        <img src="images/tropen.png" class="d-block" alt="Poster 1">
+        <img src="images/tropen.png" class="d-block w-100" alt="Poster 1">
       </div>
+
       <div class="carousel-item">
-        <img src="images/skyline.png" class="d-block" alt="Poster 2">
+        <img src="images/skyline.png" class="d-block w-100" alt="Poster 2">
       </div>
+
       <div class="carousel-item">
-        <img src="images/alpen.png" class="d-block" alt="Poster 3">
+        <img src="images/alpen.png" class="d-block w-100" alt="Poster 3">
       </div>
+
     </div>
 
-    <!-- Pfeile -->
-    <button class="carousel-control-prev" type="button" data-bs-target="#posterCarousel" data-bs-slide="prev">
+    <button class="carousel-control-prev" type="button"
+            data-bs-target="#posterCarousel" data-bs-slide="prev">
       <span class="carousel-control-prev-icon" aria-hidden="true"></span>
       <span class="visually-hidden">Zurück</span>
     </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#posterCarousel" data-bs-slide="next">
+
+    <button class="carousel-control-next" type="button"
+            data-bs-target="#posterCarousel" data-bs-slide="next">
       <span class="carousel-control-next-icon" aria-hidden="true"></span>
       <span class="visually-hidden">Weiter</span>
     </button>
+
   </div>
+</div>
+
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
   <!-- Eigene JS -->
   <script src="js/main.js"></script>
 
+
+
   <!-- Carousel automatisch starten -->
   <script>
+    
+  window.addEventListener("load", function () {
     const carouselElement = document.querySelector('#posterCarousel');
-    const carousel = new bootstrap.Carousel(carouselElement, {
-      interval: 3000, // 3 Sekunden pro Slide
-      ride: 'carousel'
+
+    new bootstrap.Carousel(carouselElement, {
+      interval: 3000,
+      ride: 'carousel',
+      wrap: true,
+      touch: true
     });
+  });
+
+
 
     //Badge aktualisieren
      function updateCartBadge() {
