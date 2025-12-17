@@ -102,7 +102,7 @@ try{
 
     $smtpHost='smtp.gmail.com';
     $smtpUser='postershop.info@gmail.com';
-    $smtpPass='qznk tsuz ziqg tfyg';
+    $smtpPass='veyo lyyy twbl rhal';
     $smtpPort=587;
 
     $mail=new PHPMailer(true);
