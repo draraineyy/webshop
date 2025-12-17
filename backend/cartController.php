@@ -46,10 +46,15 @@ switch ($action) {
         echo json_encode(["items" => enrichItems($cart)]);
         break;
 
-    case "total":
+    case "total": //auf preis bezogen
         $total = $cart->getTotal();
         echo json_encode(["total" => $total]);
         break;
+
+    case "count":
+    $count = $cart->getItemCount(); // summiert alle Mengen im Warenkorb
+    echo json_encode(["count" => $count]);
+    break;
 
     case "price":
     $productId = $_GET['product_id'] ?? $_POST['product_id'] ?? null;

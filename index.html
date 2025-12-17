@@ -113,6 +113,19 @@
       interval: 3000, // 3 Sekunden pro Slide
       ride: 'carousel'
     });
+
+    //Badge aktualisieren
+     function updateCartBadge() {
+    fetch("backend/cartController.php?action=count")
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("cartBadge").innerText = data.count;
+      })
+      .catch(err => console.error("Fehler beim Laden des Warenkorbs:", err));
+  }
+
+  window.addEventListener("pageshow", updateCartBadge);
+
   </script>
 </body>
 </html>
