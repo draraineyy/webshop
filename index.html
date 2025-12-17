@@ -1,16 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>PosterShop - Homepage</title>
+  <title>PosterShop - Startseite</title>
 
-  <!-- Bootstrap CSS einbinden -->
-
+  <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Font Awesome für Warenkorb-Icon -->
-  <!-- Font Awesome über CDN -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <!-- Eigene CSS-Datei -->
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <!-- Eigene CSS -->
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -21,9 +19,14 @@
       <a class="navbar-brand" href="#">PosterShop</a>
       <div class="collapse navbar-collapse">
         <ul class="navbar-nav ms-auto">
-          <!-- Punkteanzeige (Platzhalter) -->
+
+          <!--Artikelübersicht-->
           <li class="nav-item">
-            <span class="nav-link">Points: 0</span>
+            <a class="nav-link" href="frontend/viewproducts.php">Artikelübersicht</span></a>
+          </li>
+          <!-- Punkteanzeige -->
+          <li class="nav-item">
+            <span class="nav-link">Punkte: 0</span>
           </li>
           <!-- Warenkorb mit Badge -->
           <li class="nav-item">
@@ -34,86 +37,82 @@
           </li>
           <!-- Login/Logout -->
           <li class="nav-item">
-            <a class="nav-link" href="frontend/viewlogin.php">Login</a>
+            <a class="nav-link" href="frontend/viewlogin.php">Anmelden</a>
           </li>
-          <!--Registrierung-->
+          <!-- Registrierung -->
           <li class="nav-item">
-            <a class="nav-link" href="frontend/register.php">Registrierung</a>
+            <a class="nav-link" href="frontend/register.php">Registrieren</a>
           </li>
         </ul>
       </div>
     </div>
   </nav>
 
-  <!-- Begrüßung (Platzhalter, später dynamisch mit JS/PHP) -->
+  <!-- Begrüßung -->
   <div class="container mt-4">
-    <h2>Welcome, User!</h2>
-    <p>You were last online on <span id="lastLogin">Date</span>.</p>
+    <h2>Willkommen, Benutzer!</h2>
+    <p>Sie waren zuletzt online am <span id="lastLogin">Datum</span>.</p>
   </div>
 
-  <!-- Logout-Meldung  -->
-  <div id="logout-message"></div>
+  <!-- Logout-Meldung -->
+  <div id="logoutMessage"></div>
 
-    <script>
+  <script>
     // URL-Parameter auslesen
     const params = new URLSearchParams(window.location.search);
 
     // Prüfen, ob logout=1 gesetzt ist
     if (params.has("logout")) {
-      document.getElementById("logout-message").innerHTML =
-        "<p style='color:green'>You have been successfully logged out.</p>";
+      document.getElementById("logoutMessage").innerHTML =
+        "<p style='color:green'>Sie haben sich erfolgreich abgemeldet.</p>";
     }
   </script>
 
-
   <!-- Bootstrap Karussell -->
-   <div id="posterCarousel" class="carousel slide container mt-4">
-  
-  <!-- Indikatoren -->
-  <div class="carousel-indicators">
-    <button type="button" data-bs-target="#posterCarousel" data-bs-slide-to="0" class="active"></button>
-    <button type="button" data-bs-target="#posterCarousel" data-bs-slide-to="1"></button>
-    <button type="button" data-bs-target="#posterCarousel" data-bs-slide-to="2"></button>
+  <div id="posterCarousel" class="carousel slide container mt-4">
+    <!-- Indikatoren -->
+    <div class="carousel-indicators">
+      <button type="button" data-bs-target="#posterCarousel" data-bs-slide-to="0" class="active"></button>
+      <button type="button" data-bs-target="#posterCarousel" data-bs-slide-to="1"></button>
+      <button type="button" data-bs-target="#posterCarousel" data-bs-slide-to="2"></button>
+    </div>
+
+    <!-- Bilder -->
+    <div class="carousel-inner">
+      <div class="carousel-item active">
+        <img src="images/tropen.png" class="d-block" alt="Poster 1">
+      </div>
+      <div class="carousel-item">
+        <img src="images/skyline.png" class="d-block" alt="Poster 2">
+      </div>
+      <div class="carousel-item">
+        <img src="images/alpen.png" class="d-block" alt="Poster 3">
+      </div>
+    </div>
+
+    <!-- Pfeile -->
+    <button class="carousel-control-prev" type="button" data-bs-target="#posterCarousel" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Zurück</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#posterCarousel" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Weiter</span>
+    </button>
   </div>
 
-  <!-- Bilder -->
-  <div class="carousel-inner">
-    <div class="carousel-item active">
-      <img src="images/tropen.png" class="d-block" alt="Poster 1">
-    </div>
-    <div class="carousel-item">
-      <img src="images/skyline.png" class="d-block" alt="Poster 2">
-    </div>
-    <div class="carousel-item">
-      <img src="images/alpen.png" class="d-block" alt="Poster 3">
-    </div>
-  </div>
-
-  <!-- Pfeile -->
-  <button class="carousel-control-prev" type="button" data-bs-target="#posterCarousel" data-bs-slide="prev">
-    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-    <span class="visually-hidden">Previous</span>
-  </button>
-  <button class="carousel-control-next" type="button" data-bs-target="#posterCarousel" data-bs-slide="next">
-    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-    <span class="visually-hidden">Next</span>
-  </button>
-</div>
-
-
-
-  <!-- Bootstrap JS einbinden -->
+  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- Eigene JS-Datei für Warenkorb-Badge -->
+  <!-- Eigene JS -->
   <script src="js/main.js"></script>
 
-  <!-- Bootstrap Carousel manuell starten, damit es automatisch durchläuft und nicht bei alpen.png hängen bleibt-->
+  <!-- Carousel automatisch starten -->
   <script>
-var carouselElement = document.querySelector('#posterCarousel');
-var carousel = new bootstrap.Carousel(carouselElement, {
-  interval: 3000, // 3 Sekunden pro Slide
-  ride: 'carousel'
-});
-</script>
+    const carouselElement = document.querySelector('#posterCarousel');
+    const carousel = new bootstrap.Carousel(carouselElement, {
+      interval: 3000, // 3 Sekunden pro Slide
+      ride: 'carousel'
+    });
+  </script>
 </body>
 </html>

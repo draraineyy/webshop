@@ -22,12 +22,21 @@ class Cart {
     }
 
     public function update($productId, $quantity) {
-        if ($quantity <= 0) {
-            $this->remove($productId);
-        } else {
-            $_SESSION['cart'][$productId] = $quantity;
-        }
+    $quantity = max(0, (int)$quantity); // keine negativen Werte
+    if ($quantity === 0) {
+        $this->remove($productId);
+    } else {
+        $_SESSION['cart'][$productId] = $quantity;
     }
+    }
+
+
+    public function getDiscount($quantity) {
+    if ($quantity >= 10) return 0.10;
+    if ($quantity >= 5) return 0.05;
+    return 0.0;
+    }
+
 
     public function getItems() {
         return $_SESSION['cart'];
@@ -36,6 +45,31 @@ class Cart {
     public function clear() {
         $_SESSION['cart'] = [];
     }
+
+    public function getTotal() {
+    $items = $this->getItems();
+    if (empty($items)) return 0.0;
+
+    $productIds = array_keys($items);
+    $placeholders = implode(',', array_fill(0, count($productIds), '?'));
+    $stmt = $this->pdo->prepare("SELECT id, price FROM products WHERE id IN ($placeholders)");
+    $stmt->execute($productIds);
+    $prices = [];
+    foreach ($stmt->fetchAll() as $row) {
+        $prices[$row['id']] = $row['price'];
+    }
+
+    $total = 0.0;
+    foreach ($items as $productId => $quantity) {
+        $basePrice = $prices[$productId] ?? 0.0;
+        $discount = $this->getDiscount($quantity);
+        $unitPrice = $basePrice * (1 - $discount);
+        $total += $unitPrice * $quantity;
+    }
+
+    return round($total, 2);
+}
+
 
     // --- Persistenter Warenkorb (DB) ---
     public function saveToDb() {

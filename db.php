@@ -1,5 +1,8 @@
 <?php
-// db.php - Zentrale Datenbankverbindung
+// db.php - Zentrale Datenbankverbindung 
+
+
+
 
 $host = 'localhost';
 $dbname = 'postershop';

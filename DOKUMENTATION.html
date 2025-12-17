@@ -43,7 +43,22 @@ Ablauf in Frontend - Controller - Model
 - Persistenz: Wenn User eingeloggt ist (customer_id gesetzt), wird zusätzlich saveToDb() aufgerufen.
 
 
+5. AJAX in der Warenkorblogik (Navigationsleiste) Punkt 14 auf Checkliste
+- Warenkorb‑Symbol mit Badge → hast du in der Navbar 
+- AJAX‑Update ohne Reload → erfüllt durch fetch() in cart.js 
+- Automatische Aktualisierung beim Hinzufügen/Entfernen → durch updateCartBadge() nach jedem Request 
 
+
+Checkliste Punkt 12  zur Artikelübersicht- Suchleiste: Funktionsweise
+Ein Suchfeld ist einfach ein <input>‑Element, in das der Benutzer einen Text eingibt.
+Mit JavaScript kannst du dann:
+- Den eingegebenen Text auslesen.
+- Alle Artikel (z. B. Bootstrap Cards) durchgehen.
+- Prüfen, ob Titel oder Beschreibung den Suchbegriff enthalten.
+- Nur die passenden Artikel anzeigen, die anderen ausblenden.
+👉 Das Ganze passiert live im Browser – ohne Reload
+
+hier Client-Side variante, weil es nur eine kleine Anzahl an Produkten ist, sonst Server-Side (besser für größere Datenbanken- filtert direkt im SQL)
 
 </p>
 

@@ -1,7 +1,7 @@
 <?php
 session_start();
 require_once("../db.php");          // DB-Verbindung
-require_once("../models/Cart.php"); // dein Model
+require_once("models/cart.php");    // dein Model
 
 // Customer-ID aus Session holen (falls eingeloggt)
 $customerId = $_SESSION['customer_id'] ?? null;
@@ -20,7 +20,7 @@ switch ($action) {
             $cart->add($productId, $quantity);
             $cart->saveToDb(); // persistieren, falls User eingeloggt
         }
-        echo json_encode(["success" => true, "items" => $cart->getItems()]);
+        echo json_encode(["success" => true, "items" => enrichItems($cart)]);
         break;
 
     case "remove":
@@ -29,7 +29,7 @@ switch ($action) {
             $cart->remove($productId);
             $cart->saveToDb();
         }
-        echo json_encode(["success" => true, "items" => $cart->getItems()]);
+        echo json_encode(["success" => true, "items" => enrichItems($cart)]);
         break;
 
     case "update":
@@ -39,13 +39,45 @@ switch ($action) {
             $cart->update($productId, $quantity);
             $cart->saveToDb();
         }
-        echo json_encode(["success" => true, "items" => $cart->getItems()]);
+        echo json_encode(["success" => true, "items" => enrichItems($cart)]);
         break;
 
     case "get":
-        echo json_encode(["items" => $cart->getItems()]);
+        echo json_encode(["items" => enrichItems($cart)]);
         break;
 
+    case "total":
+        $total = $cart->getTotal();
+        echo json_encode(["total" => $total]);
+        break;
+
+    case "price":
+    $productId = $_GET['product_id'] ?? $_POST['product_id'] ?? null;
+    if ($productId) {
+        $stmt = $pdo->prepare("SELECT price FROM products WHERE id=?");
+        $stmt->execute([$productId]);
+        $price = $stmt->fetchColumn();
+        echo json_encode(["price" => round($price, 2)]);
+    } else {
+        echo json_encode(["error" => "Keine Produkt-ID angegeben"]);
+    }
+    break;
+
+
     default:
-        echo json_encode(["error" => "Unknown action"]);
+        echo json_encode(["error" => "Ungültige Aktion"]);
+
+}
+
+// Items mit Rabatt anreichern
+function enrichItems($cart) {
+    $items = $cart->getItems();
+    $result = [];
+    foreach ($items as $productId => $quantity) {
+        $result[$productId] = [
+            "quantity" => $quantity,
+            "discount" => $cart->getDiscount($quantity)
+        ];
+    }
+    return $result;
 }

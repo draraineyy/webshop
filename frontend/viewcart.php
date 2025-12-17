@@ -4,45 +4,112 @@ session_start();
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <title>Warenkorb</title>
-    <!-- CSS  -->
-    <link rel="stylesheet" href="../frontend/css/style.css">
+  <meta charset="UTF-8">
+  <title>Warenkorb</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
+<body class="bg-light">
 
-<h1>Your Cart</h1>
+<div class="container mt-4">
+  <!-- Kopfzeile mit Warenkorb-Symbol -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Warenkorb</h2>
 
-<!-- Anzeige der Anzahl Artikel -->
-<p>Items in cart: <span id="cart-count">0</span></p>
+    <a href="viewproducts.php" class="btn btn-outline-secondary">
+  <i class="fa-solid fa-arrow-left"></i> Zur Artikelübersicht
+</a>
 
-<!-- Beispiel-Buttons für Test -->
-<button onclick="addToCart(1, 1)">Add Product 1</button>
-<button onclick="addToCart(2, 3)">Add Product 2 (3 pcs)</button>
-<button onclick="removeFromCart(1)">Remove Product 1</button>
-<button onclick="updateCart(2, 5)">Update Product 2 to 5 pcs</button>
-<button onclick="getCart()">Refresh Cart</button>
+  </div>
 
-<!-- Hier kannst du später eine Tabelle oder Liste für die Warenkorb-Items einbauen -->
-<div id="cart-items"></div>
+  <!-- Anzeige der Anzahl Artikel und Gesamtpreis-->
+ <p class="lead">
+  Artikel im Warenkorb: <span id="cart-count">0</span><br>
+  Gesamtpreis: <span id="cart-total">0,00 €</span>
+ </p>
 
-<!-- Einbindung von cart.js -->
+
+  <!-- Warenkorb-Tabelle -->
+  <div id="cart-items" class="table-responsive"></div>
+
+  <!-- Zur Kasse -->
+  <div class="mt-3">
+    <a href="checkout.php" class="btn btn-success">Zur Kasse</a>
+  </div>
+</div>
+
 <script src="../frontend/js/cart.js"></script>
 
 <script>
-// Beispiel: Darstellung der Items im Warenkorb
+// Darstellung der Items im Warenkorb
 function updateCartView(items) {
-    // Anzahl Artikel aktualisieren
-    document.getElementById("cart-count").innerText = Object.keys(items).length;
+  // Gesamtanzahl berechnen (Summe aller Mengen)
+  const count = Object.values(items).reduce((sum, item) => sum + parseInt(item.quantity), 0);
+  document.getElementById("cart-count").innerText = count;
 
-    // Liste der Items anzeigen
-    let output = "<ul>";
-    for (const [productId, quantity] of Object.entries(items)) {
-        output += `<li>Product ${productId}: ${quantity} pcs</li>`;
-    }
-    output += "</ul>";
-    document.getElementById("cart-items").innerHTML = output;
+  // Tabelle aufbauen
+  let output = "<table class='table table-bordered'>";
+  output += "<thead><tr><th>Produkt</th><th>Menge</th><th>Rabatt</th><th>Preis/Stück</th><th>Artikel entfernen</th></tr></thead><tbody>";
+
+  for (const [productId, item] of Object.entries(items)) {
+    let discountText = item.discount > 0 ? (item.discount * 100) + "%" : "-";
+
+    output += `
+      <tr>
+        <td>Produkt ${productId}</td>
+        <td>
+          <input type="number" min="1" value="${item.quantity}" 
+                 onchange="updateCart(${productId}, this.value)" 
+                 class="form-control form-control-sm" style="width:80px;">
+        </td>
+        <td>${discountText}</td>
+         <td id="price-${productId}">-</td> <!-- Platzhalter für Preis -->
+        <td>
+          <button class="btn btn-sm btn-danger" onclick="removeFromCart(${productId})">X</button>
+        </td>
+      </tr>`;
+  }
+
+  output += "</tbody></table>";
+  document.getElementById("cart-items").innerHTML = output; //Tabelle ins DOM schreiben
+
+   //Preise nachladen, nachdem die Tabelle im DOM steht
+  for (const [productId, item] of Object.entries(items)) {
+    getProductPrice(productId); // füllt die <td id="price-..."> mit dem echten Preis
+  }
+
 }
+
+// Warenkorb beim Laden aktualisieren
+document.addEventListener("DOMContentLoaded", getCart);
+
+function updateCartTotal() {
+  fetch("../backend/cartController.php?action=total")
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("cart-total").innerText = data.total.toFixed(2) + " €";
+    })
+    .catch(err => console.error("Fehler beim Laden des Gesamtpreises:", err));
+}
+
+// Beim Laden der Seite sofort ausführen
+updateCartTotal();
+
+// Beispiel: nach einem Produkt-Update erneut ausführen
+document.addEventListener("DOMContentLoaded", () => {
+  getCart();
+  updateCartTotal();
+});
+
+//Preis abrufen
+function getProductPrice(productId) {
+  fetch("../backend/cartController.php?action=price&product_id=" + productId)
+    .then(res => res.json())
+    .then(data => {
+      console.log("Preis für Produkt " + productId + ": " + data.price + " €");
+      document.getElementById("price-" + productId).innerText = data.price + " €";
+    });
+}
+
 </script>
 
 </body>
