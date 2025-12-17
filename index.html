@@ -69,7 +69,6 @@
   </script>
 
   <!-- Bootstrap Karussell -->
-<<<<<<< HEAD
   <div id="posterCarousel" class="carousel slide container mt-4">
     <!-- Indikatoren -->
     <div class="carousel-indicators">
@@ -100,15 +99,6 @@
       <span class="carousel-control-next-icon" aria-hidden="true"></span>
       <span class="visually-hidden">Weiter</span>
     </button>
-=======
-   <div id="posterCarousel" class="carousel slide container mt-4"> 
-  
-  <!-- Indikatoren -->
-  <div class="carousel-indicators">
-    <button type="button" data-bs-target="#posterCarousel" data-bs-slide-to="0" class="active"></button>
-    <button type="button" data-bs-target="#posterCarousel" data-bs-slide-to="1"></button>
-    <button type="button" data-bs-target="#posterCarousel" data-bs-slide-to="2"></button>
->>>>>>> b6e25966156d51fd9bc87b0fb1a784e2d75ce317
   </div>
 
   <!-- Bootstrap JS -->
@@ -123,6 +113,19 @@
       interval: 3000, // 3 Sekunden pro Slide
       ride: 'carousel'
     });
+
+    //Badge aktualisieren
+     function updateCartBadge() {
+    fetch("backend/cartController.php?action=count")
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("cartBadge").innerText = data.count;
+      })
+      .catch(err => console.error("Fehler beim Laden des Warenkorbs:", err));
+  }
+
+  window.addEventListener("pageshow", updateCartBadge);
+
   </script>
 </body>
 </html>

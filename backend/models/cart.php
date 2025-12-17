@@ -42,6 +42,11 @@ class Cart {
         return $_SESSION['cart'];
     }
 
+    public function getItemCount() {
+    $items = $this->getItems();     // gibt ein Array mit Schlüssel: [productId => quantity]
+    return array_sum($items);       // summiert alle Mengen
+}
+
     public function clear() {
         $_SESSION['cart'] = [];
     }

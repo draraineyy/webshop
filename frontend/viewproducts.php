@@ -8,6 +8,7 @@ $products = $stmt->fetchAll();
 <head>
   <meta charset="UTF-8">
   <title>PosterShop - Artikelübersicht</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
@@ -25,11 +26,9 @@ $products = $stmt->fetchAll();
     </a>
 
     <!-- Warenkorb-Button mit Badge -->
-    <a href="viewcart.php" class="btn btn-outline-primary position-relative">
-      <i class="fa-solid fa-cart-shopping"></i> Warenkorb
-      <span id="cartBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-        0
-      </span>
+    <a class="nav-link" href="viewcart.php">
+        <i class="fa-solid fa-cart-shopping"></i>
+        <span id="cartBadge" class="badge bg-danger">0</span>
     </a>
   </div>
 </div>
@@ -98,6 +97,34 @@ document.getElementById("searchInput").addEventListener("keyup", function() {
     }
   });
 });
+
+function updateCartBadge() {
+  fetch("../backend/cartController.php?action=count&ts=" + Date.now())
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("cartBadge").innerText = data.count;
+    });
+}
+
+function updateCartBadge() {
+  fetch("../backend/cartController.php?action=count&ts=" + Date.now())
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("cartBadge").innerText = data.count;
+    });
+}
+
+function updateCartBadge() {
+  fetch("../backend/cartController.php?action=count&ts=" + Date.now())
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("cartBadge").innerText = data.count;
+    });
+}
+//wird jedes Mal beim öffnen einer Seite oder zurückgehen zu einer Seite ausgeführt
+window.addEventListener("pageshow", updateCartBadge);
+
+
 </script>
 
 </body>
