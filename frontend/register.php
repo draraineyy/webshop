@@ -58,9 +58,12 @@ $csrf = $_SESSION['csrf'];
 
             <div class="col-12">
                 <button class="btn btn-primary" type="submit">Registrieren</button>
-                viewlogin.php Zum Login</a>
+                <!--<button class="btn btn-primary" type="submit" action="viewlogin.php">Zum Login</a> -->
             </div>
         </form>
+
+        <div class="d-grid gap-2 mt-3">
+            <a href="viewlogin.php">Zum Login</a>
 
         <script>
             function validateRegister(){
