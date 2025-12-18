@@ -1,6 +1,6 @@
 <?php
 // Session initialisieren, falls bisher noch keine initialisiert wurde
-if(session_status() === PHP_SESSION_NONE){
+/*if(session_status() === PHP_SESSION_NONE){
     session_start();
 }
 require_once __DIR__ . '/../../db.php';
@@ -10,4 +10,4 @@ require_once __DIR__ . '/../../db.php';
 function sendEmail($email, $subject, $body){
         error_log("Email an: $email\nBetreff: $subject\nInhalt: $body\n");
         return true;
-}
+}*/
