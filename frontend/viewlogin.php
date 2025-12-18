@@ -25,7 +25,7 @@
           <div class="mb-3">
     
             <!-- Eingabe für E-Mail -->
-            <label for="email">Email:</label>
+            <label for="email">Benutzername:</label>
             <input type="email" id="email" name="email" required>
     
             <!-- Eingabe für Passwort -->
@@ -43,7 +43,7 @@
           </div>
 
           <!-- Versteckte Felder -->
-          <!-- <input type="hidden" id="password_hash" name="password_hash">   <!-- hidden-feld:passwort hash. Darin kommt der Hash aus login.js-->
+          <!-- <input type="hidden" id="password_hash" name="password_hash">   <  !-- hidden-feld:passwort hash. Darin kommt der Hash aus login.js-->
           <input type="hidden" id="resolution" name="resolution">
           <input type="hidden" id="client_os" name="client_os">
     
