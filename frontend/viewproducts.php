@@ -72,7 +72,7 @@ $products = $stmt->fetchAll();
             </div>
 
             <!-- In den Warenkorb -->
-            <button class="btn btn-primary w-100" onclick="addToCart(<?php echo $product['id']; ?>, document.getElementById('qty-<?php echo $product['id']; ?>').value)">
+            <button class="btn btn-primary w-100" onclick="addToCart(<?= (int)$product['id']; ?>, parseInt(document.getElementById('qty-<?= (int) $product['id'] ?>').value,10)||1)">
               <i class="fa-solid fa-cart-shopping"></i> In den Warenkorb
             </button>
           </div>

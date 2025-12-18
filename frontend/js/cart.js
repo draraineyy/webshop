@@ -1,19 +1,27 @@
 // cart.js – AJAX-Funktionen für Warenkorb
 
-function addToCart(productId, quantity = 1) {
-    fetch("../backend/cartController.php?action=add", {
+async function addToCart(productId, quantity = 1) {
+  const body=new URLSearchParams({
+    product_id: String(productId),
+    quantity: String(quantity)
+  });
+  try{
+    const res =await fetch("../backend/cartController.php?action=add", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: `product_id=${productId}&quantity=${quantity}`
-
-        
-    }) 
-    .then(res => res.json())
-    .then(data => {
-        console.log("Cart after add:", data.items);
+        body 
+  });
+  const text = await res.text();
+  console.log("addToCart response:", res.status, text);
+  const data =JSON.parse(text);
+  if(!res.ok||data.error)throw new Error(data.error||("HTTP" + res.status));
         updateCartView(data.items);
         updateCartTotal();
-    });
+        updateCartBadge();
+  } catch(err){
+      console.error('addToCart error:', err);
+      alert("Warenkorb-Fehler: " +err.message);
+  }
 }
 
 function removeFromCart(productId) {
@@ -72,16 +80,21 @@ function getCart() {
 }
 
 function updateCart(productId, quantity) {  // wenn ich in viewcart die Zahl im Inputfeld ändere, wird ein update-request an den controller geschickt
+  const body=new URLSearchParams({
+    product_id: String(productId),
+    quantity: String(quantity)
+  });
     fetch("../backend/cartController.php?action=update", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: `product_id=${productId}&quantity=${quantity}`
+        body
     })
     .then(res => res.json())
     .then(data => {
         console.log("Cart after update:", data.items);
         updateCartView(data.items);   // Ansicht aktualisieren
         updateCartTotal();            // Gesamtpreis aktualisieren
+        updateCartBadge();
     });
 }
 

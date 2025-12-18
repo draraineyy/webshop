@@ -136,13 +136,13 @@ foreach ($positions as $pos){
         <td class="cell name">{$title}</td>
         <td class="cell qty">{$qty}</td>
         <td class="cell price">{$unit}</td>
-        <td class="cell disc">{$disc}</td>
+        <td class="cell disc">{$disc}%</td>
     </tr>
     HTML;
 }
 
 if($customerEmail){
-    $mail=new PHPMailer(true);
+    $mail=new PHPMailer\PHPMailer\PHPMailer(true);
     try{
         //SMTP
         $mail->isSMTP();
@@ -150,7 +150,7 @@ if($customerEmail){
         $mail->SMTPAuth=true;
         $mail->Username='postershop.info@gmail.com';
         $mail->Password='veyo lyyy twbl rhal';
-        $mail->SMTPSecure=PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->SMTPSecure=PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port=587;
 
         //HTML & Charset
@@ -169,7 +169,7 @@ if($customerEmail){
         }
 
         $safeName=htmlspecialchars($customerName, ENT_QUOTES, 'UTF-8');
-        $safeOrder=htmlSpecialchars($orderNumber, ENT_QUOTES, 'UTF-8');
+        $safeOrder=htmlspecialchars($orderNumber, ENT_QUOTES, 'UTF-8');
         $mail->Subject="Bestellbestätigung {$safeOrder} - PosterShop";
 
         //HTML
@@ -203,7 +203,7 @@ if($customerEmail){
                 <div class="container">
                     <div class="card">
                         <div class="header">
-                            cid:shoplogo
+                            <img src="cid:shoplogo">
                             <div class="brand">
                                 PosterShop
                             </div>
@@ -238,7 +238,7 @@ if($customerEmail){
                                     <strong>{$sumStr} €</strong>
                                 </div>
                             </div>
-                            https://example.com/orders/{$safeOrder}Bestellung anzeigen</a>
+                            <a href="https://example.com/orders/{$safeOrder}Bestellung anzeigen"></a>
                         </div>
                         <div class="footer">
                             <p>&copy; PosterShop</p>
@@ -256,17 +256,17 @@ if($customerEmail){
     }
 }
 
-try{
+/*try{
     $mail->isSMTP();
     $mail->Host=getenv
-}
+}*/
 
 // Weiterleitung auf Danke-Seite
 header("Location: ../frontend/thankyou.php?order=" . urlencode($orderNumber));
 exit;
 
     
-} catch (Exception $e) {
+} catch (\PHPMailer\PHPMailer\Exception $e) {
     $pdo->rollBack();
     die("Bestellung fehlgeschlagen: " . $e->getMessage());
 }

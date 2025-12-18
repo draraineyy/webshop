@@ -14,54 +14,71 @@ $action = $_GET['action'] ?? $_POST['action'] ?? null;
 
 switch ($action) {
     case "add":
-        $productId = $_POST['product_id'] ?? null;
-        $quantity  = $_POST['quantity'] ?? 1;
-        if ($productId) {
+        $productId = (int)($_POST['product_id'] ?? 0);
+        $quantity  = max(1, (int)($_POST['quantity'] ?? 1));
+        if($productId <=0){
+            http_response_code(400);
+            echo json_encode(["error" => "invalid_product_id"]);
+            exit;
+        }
+
+        $cart->add($productId, $quantity);
+        /*if ($productId>0) {
             $cart->add($productId, $quantity);
 
             // Für Gäste: Session speichern
             $_SESSION['cart'][$productId] = ($_SESSION['cart'][$productId] ?? 0) + $quantity;
 
-            // Für eingeloggte User: DB speichern
-            if ($customerId) {
-                $cart->saveToDb();
-            }
+            // Für eingeloggte User: DB speichern*/
+        if ($customerId) {
+            $cart->saveToDb();
         }
+    }
             
         
         echo json_encode(["success" => true, "items" => enrichItems($cart)]);
         break;
 
     case "remove":
-        $productId = $_POST['product_id'] ?? null;
-        if ($productId) {
-            $cart->remove($productId);
-            // Gäste: Session löschen
-            unset($_SESSION['cart'][$productId]);
+        $productId = (int)($_POST['product_id'] ?? 0);
+        if($productId <=0){
+            http_response_code(400);
+            echo json_encode(['error' => 'invalid_product_id']);
+            exit;
+        }
 
-            //für eingeloggte User
-            if ($customerId) {
-                $cart->saveToDb();
-            }
-        
+        $cart->remove($productId);
+
+        if(!$customerId){
+            //Gäste: aus Session entfernen
+            unset($_SESSION['cart'][$productId]);
+        }
+        else{
+            // für eingeloggte User
+            $cart->saveToDb();
         }
         echo json_encode(["success" => true, "items" => enrichItems($cart)]);
         break;
 
     case "update":
-        $productId = $_POST['product_id'] ?? null;
-        $quantity  = $_POST['quantity'] ?? 1;
-        if ($productId) {
-            $cart->update($productId, $quantity);
+        $productId = (int)($_POST['product_id'] ?? 0);
+        $quantity  = max(1, (int)($_POST['quantity'] ?? 1));
 
-             // Gäste: Session aktualisieren
+        if($productId <=0){
+            http_response_code(400);
+            echo json_encode(['error'=> 'invalid_product_id']);
+            exit;
+        }
+
+        $cart->update($productId, $quantity);
+
+        if(!$customerId){
+            // Gäste: Session aktualisieren
             $_SESSION['cart'][$productId] = $quantity;
-            //eingeloggte:
-            if ($customerId) {
-                $cart->saveToDb();
-
-            }
-
+        }
+        else{
+            // eingeloggte:
+            $cart->saveToDb();
         }
         echo json_encode(["success" => true, "items" => enrichItems($cart)]);
         break;
