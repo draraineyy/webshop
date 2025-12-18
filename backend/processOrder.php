@@ -77,14 +77,102 @@ try {
 $orderSum = round($orderSum + $shippingCost - $appliedDiscount, 2);
 $pdo->prepare("UPDATE orders SET sum=? WHERE id=?")->execute([$orderSum, $orderId]);
 // Endsumme inkl. Versand minus Rabatt
-$orderSum = round($orderSum + $shippingCost - $appliedDiscount, 2);
-$pdo->prepare("UPDATE orders SET sum=? WHERE id=?")->execute([$orderSum, $orderId]);
+//$orderSum = round($orderSum + $shippingCost - $appliedDiscount, 2);
+//$pdo->prepare("UPDATE orders SET sum=? WHERE id=?")->execute([$orderSum, $orderId]);
 
-    $orderSum = round($orderSum + $shippingCost - $appliedDiscount, 2);
-    $pdo->prepare("UPDATE orders SET sum=? WHERE id=?")->execute([$orderSum, $orderId]);
+//$orderSum = round($orderSum + $shippingCost - $appliedDiscount, 2);
+//$pdo->prepare("UPDATE orders SET sum=? WHERE id=?")->execute([$orderSum, $orderId]);
 
-    $cart->clear();
-    $pdo->commit();
+$cart->clear();
+$pdo->commit();
+
+// Bestätigungsemail versenden
+require_once __DIR__ . '/PHPMailer/src/PHPMailer.php';
+require_once __DIR__ . '/PHPMailer/src/SMTP.php';
+require_once __DIR__ . '/PHPMailer/src/Exception.php';
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+//Kundendaten laden
+$stmtCust=$pdo->prepare("SELECT email, name FROM customer WHERE id=?");
+$stmtCust->execute([$_SESSION['customer_id']]);
+$customer=$stmtCust->fetch(PDO::FETCH_ASSOC);
+$customerEmail=$customer['email']??null;
+$customerName=$customer['name']??'';
+
+// Positionen für Mail laden
+$stmtPos=$pdo->prepare("SELECT op.product_id, op.quantity, op.price, op.discount, p.title
+    FROM order_position op
+    JOIN products p ON p.id=op.product_id
+    WHERE op.order_id=?"
+);
+$stmtPos->execute([$orderId]);
+$positions=$stmtPos->fetchAll(PDO::FETCH_ASSOC);
+
+//Versandlabel erzeugen
+$shippingLabel=($delivery==='express')?'DHL Express'
+    :(($delivery==='dpd')?'DPD'
+    :'DHL Standard');
+
+// Werte für Anzeige formatieren
+$fmt=fn(float $n)=> number_format($n, 2, ',', '.');
+$shippingStr=$fmt($shippingCost);
+$sumStr=$fmt($orderSum);
+
+// Row-HTML erzeugen
+$rowsHtml='';
+foreach ($positions as $pos){
+    $title=htmlspecialchars($pos['title']??('Produkt #' .$pos['product_id']), ENT_QUOTES, 'UTF-8');
+    $qty=(int)$pos['quantity'];
+    $unit=$fmt((float)$pos['price']);
+    $disc=(float)$pos['discount']*100;
+    $rowsHtml .= <<<HTML
+    <tr>
+        <td class="cell name">{$title}</td>
+        <td class="cell qty">{$qty}</td>
+        <td class="cell price">{$unit}</td>
+        <td class="cell disc">{$disc}</td>
+    </tr>
+    HTML;
+}
+
+if($customerEmail){
+    $mail=new PHPMailer(true);
+    try{
+        //SMTP
+        $mail->isSMTP();
+        $mail->Host='smtp.gmail.com';
+        $mail->SMTPAuth=true;
+        $mail->Username='postershop.info@gmail.com';
+        $mail->Password='veyo lyyy twbl rhal';
+        $mail->SMTPSecure=PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port=587;
+
+        //HTML & Charset
+        $mail->isHTML(true);
+        $mail->CharSet='UTF-8';
+        $mail->Encoding='base64';
+
+        //Absender/Empfänger
+        $mail->setFrom($mail->Username, 'PosterShop');
+        $mail->addAddress($customerEmail, $customerName);
+
+        //Optional Logo
+        $logoPath=__DIR__ .'/assets/logo.png
+    }
+}
+
+try{
+    $mail->isSMTP();
+    $mail->Host=getenv
+}
+
+$smtpHost='smtp.gmail.com';
+$smtpUser='postershop.info@gmail.com';
+$smtpPass='veyo lyyy twbl rhal';
+$smtpPort=587;
+
+
 
     header("Location: ../frontend/thankyou.php?order=" . urlencode($orderNumber));
     exit;
