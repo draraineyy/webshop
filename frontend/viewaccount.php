@@ -6,7 +6,7 @@ session_start();
 require_once("../db.php");
 
 // Sicherheitscheck: Nur eingeloggte User dürfen hier rein
-if (!isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['customer_id'])) {
     header("Location: viewlogin.php"); // Redirect zur Login-Seite
     exit; // Script beenden
 }
@@ -18,7 +18,7 @@ $lastSeenTs = $_SESSION['time']     ?? null; // Zeitpunkt des letzten Logins
 
 // Punkte aus der Datenbank laden
 $stmt = $pdo->prepare("SELECT COALESCE(SUM(points),0) FROM points WHERE customer_id=?");
-$stmt->execute([$_SESSION['user_id']]);
+$stmt->execute([$_SESSION['customer_id']]);
 $totalPoints = (int)$stmt->fetchColumn(); // Ergebnis als Integer
 ?>
 <!DOCTYPE html>
@@ -77,7 +77,7 @@ $totalPoints = (int)$stmt->fetchColumn(); // Ergebnis als Integer
 
         <!-- Logout -->
         <li class="nav-item">
-          <a class="nav-link" href="viewlogout.php">Abmelden</a>
+          <a class="nav-link" href="logout.php">Abmelden</a>
         </li>
       </ul>
     </div>

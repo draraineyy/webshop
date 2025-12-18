@@ -83,7 +83,7 @@ try{
 
     $pdo->commit();
 
-    $_SESSION['user_id']=$customerId;
+    $_SESSION['customer_id']=$customerId;
     $_SESSION['username']=$email;
     $_SESSION['time']=time();
     $_SESSION['pending_pw_change']=true;

@@ -4,7 +4,7 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL);
 session_start();
 
-if(!isset($_SESSION['user_id'])){
+if(!isset($_SESSION['customer_id'])){
     header("Location: ../frontend/viewlogin.php");
     exit;
 }
@@ -43,7 +43,7 @@ if(!$ok){
 // Secret jetzt dauerhaft beim User speichern
 try{
     $stmt=$pdo->prepare("UPDATE customer SET twofacode=?, created_at=created_at WHERE id=?");
-    $stmt->execute([$secret, $_SESSION['user_id']]);
+    $stmt->execute([$secret, $_SESSION['customer_id']]);
     unset($_SESSION['pending_2fa_secret']);
 
     header("Location: ../frontend/viewaccount.php");

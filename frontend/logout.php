@@ -3,9 +3,9 @@ session_start();
 require_once("../db.php"); // DB-Verbindung laden
 
 // Wenn ein User eingeloggt war → aus online_status entfernen
-if (isset($_SESSION['user_id'])) {
+if (isset($_SESSION['customer_id'])) {
     $stmt = $pdo->prepare("DELETE FROM online_status WHERE customer_id = ?");
-    $stmt->execute([$_SESSION['user_id']]);
+    $stmt->execute([$_SESSION['customer_id']]);
 }
 
 // Alle Session-Variablen löschen
@@ -15,5 +15,5 @@ session_unset();
 session_destroy();
 
 // Redirect zurück zur Startseite
-header("Location: ../index.html?logout=1");
+header("Location: ../index.php");
 exit;

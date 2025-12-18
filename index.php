@@ -56,7 +56,7 @@ if ($isLoggedIn) {
           </a>
         </li>
         <?php if ($isLoggedIn): ?>
-          <li class="nav-item"><a class="nav-link" href="frontend/viewlogout.php">Abmelden</a></li>
+          <li class="nav-item"><a class="nav-link" href="frontend/logout.php">Abmelden</a></li>
         <?php else: ?>
           <li class="nav-item"><a class="nav-link" href="frontend/viewlogin.php">Anmelden</a></li>
           <li class="nav-item"><a class="nav-link" href="frontend/register.php">Registrieren</a></li>

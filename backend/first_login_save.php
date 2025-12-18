@@ -6,7 +6,7 @@ session_start();
 
 require_once("../db.php");
 
-if(!isset($_SESSION['user_id'])){
+if(!isset($_SESSION['customer_id'])){
     header("Location: ../frontend/viewlogin.php");
     exit;
 }
@@ -31,7 +31,7 @@ if($pw1!==$pw2||!preg_match($regex, $pw1)){
 try{
     // Aktuellen Hash laden
     $stmt=$pdo->prepare("SELECT password_hash, must_change_password FROM customer WHERE id=? LIMIT 1");
-    $stmt->execute([$_SESSION['user_id']]);
+    $stmt->execute([$_SESSION['customer_id']]);
     $row=$stmt->fetch(PDO::FETCH_ASSOC);
 
     if(!$row){
@@ -53,7 +53,7 @@ try{
 
     //Speichern und must_password_change abschalten
     $stmt=$pdo->prepare("UPDATE customer SET password_hash=?, must_change_password=0 WHERE id=?");
-    $stmt->execute([$newHash, $_SESSION['user_id']]);
+    $stmt->execute([$newHash, $_SESSION['customer_id']]);
 
     //CSRF-Token erneuern
     unset($_SESSION['csrf']);
