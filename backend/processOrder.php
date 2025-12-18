@@ -163,7 +163,47 @@ if($customerEmail){
         $mail->addAddress($customerEmail, $customerName);
 
         //Optional Logo
-        $logoPath=__DIR__ .'/assets/logo.png
+        $logoPath=__DIR__ .'/../images/logo.png';
+        if(is_readable($logoPath)){
+            $mail->addEmbeddedImage($logoPath, 'shoplogo', 'logo.png', 'base64', 'image/png');
+        }
+
+        $safeName=htmlspecialchars($customerName, ENT_QUOTES, 'UTF-8');
+        $safeOrder=htmlSpecialchars($orderNumber, ENT_QUOTES, 'UTF-8');
+        $mail->Subject="Bestellbestätigung {$safeOrder} - PosterShop";
+
+        //HTML
+        $mail->Body=<<<HTML
+        <!DOCTYPE html>
+        <html lang="de">
+            <head>
+                <meta charset="UTF-8">
+                <style>
+                    body{margin:0;padding:0;background:#f6f7fb;color:#222;font-family:system-ui, -apple-system,Segoe UI,Roboto,Arial,sans-serif}
+                    .container{max-width:680px;margin:0 auto;padding:24px}
+                    .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,.06);overflow:hidden}
+                    .header{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid #eef0f5}
+                    .brand{font-weight:700;font-size:18px}
+                    .content{padding:20px}
+                    h1{font-size:20px;margin:0 0 8px}
+                    p{margin:0 0 12px;line-height:1.5}
+                    .meta{background:#fafafa;border:1px solid #eef0f5;border-radius:10px;padding:12px;margin:12px 0}
+                    .table{width:100%;border-collapse:collapse;margin-top:12px}
+                    .table th{font-weight:600;text-align:left;padding:10px;border-bottom:1px solid #e8e8ef;font-size:14px;color:#555}
+                    .table td{padding:10px;border-bottom:1px solid #f0f1f6;font-size:14px}
+                    .cell.qty,.cell.price,.cell.disc{text-align:right}
+                    .total{display:flex;justify-content:flex-end;margin-top:16px;font-size:16px}
+                    .total .label{margin-right:12px;font-weight:700}
+                    .footer{padding:16px 20px;border-top:1px solid #eef0f5;color:#6b7280;font-size:12px}
+                    .btn{display:inline-block;background:#0ea5e9;color:#fff;text-decoration:none;padding:10px 14px;;border-radius:8px;font-weight:600;margin-top:12px}
+                </style>
+            </head>
+
+            <body>
+                <div class="container">
+                    <div class="card">
+                        <div class="
+
     }
 }
 
