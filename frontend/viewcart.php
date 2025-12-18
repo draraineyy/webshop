@@ -44,7 +44,7 @@ $username   = $_SESSION['username'] ?? '';
 </div>
 
 <!-- JS -->
-<script src="../frontend/js/cart.js"></script>
+<script src="js/cart.js"></script>
 <script>
   // Warenkorb-Items darstellen
   function updateCartView(items) {

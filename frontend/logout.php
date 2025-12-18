@@ -15,5 +15,5 @@ session_unset();
 session_destroy();
 
 // Redirect zurück zur Startseite
-header("Location: ../index.html?logout=1");
+header("Location: ../index.php");
 exit;

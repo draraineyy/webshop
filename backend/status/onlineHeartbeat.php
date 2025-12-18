@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once("../db.php");
+require_once("../../db.php");
 
 // Nur eingeloggte User berücksichtigen
 if (!isset($_SESSION['user_id'])) {
