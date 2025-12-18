@@ -111,3 +111,12 @@ function getProductPrice(productId) {
       document.getElementById("price-" + productId).innerText = data.price + " €";
     });
 }
+
+//Anzahl neben Warenkorbsymbol aktualisieren
+function updateCartBadge() {
+  fetch("../backend/cartController.php?action=count&ts=" + Date.now())
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("cartBadge").innerText = data.count;
+    });
+}
