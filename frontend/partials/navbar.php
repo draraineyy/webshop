@@ -9,7 +9,7 @@
 
         <!-- Artikelübersicht -->
         <li class="nav-item">
-          <a class="nav-link" href="frontend/viewproducts.php">Artikelübersicht</a>
+          <a class="nav-link" href="viewproducts.php">Artikelübersicht</a>
         </li>
 
         <?php if (!empty($isLoggedIn)): ?>
@@ -22,7 +22,7 @@
 
           <!-- Warenkorb mit Badge -->
           <li class="nav-item">
-            <a class="nav-link" href="frontend/viewcart.php">
+            <a class="nav-link" href="viewcart.php">
               <i class="fa-solid fa-cart-shopping"></i>
               <span id="cartBadge" class="badge bg-danger">0</span>
             </a>
@@ -38,12 +38,12 @@
 
           <!-- Logout -->
           <li class="nav-item">
-            <a class="nav-link" href="frontend/logout.php">Abmelden</a>
+            <a class="nav-link" href="logout.php">Abmelden</a>
           </li>
         <?php else: ?>
           <!-- Warenkorb auch für Gäste sichtbar -->
           <li class="nav-item">
-            <a class="nav-link" href="frontend/viewcart.php">
+            <a class="nav-link" href="viewcart.php">
               <i class="fa-solid fa-cart-shopping"></i>
               <span id="cartBadge" class="badge bg-danger">0</span>
             </a>
@@ -51,10 +51,10 @@
 
           <!-- Login/Registrierung für Gäste -->
           <li class="nav-item">
-            <a class="nav-link" href="frontend/viewlogin.php">Anmelden</a>
+            <a class="nav-link" href="viewlogin.php">Anmelden</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="frontend/register.php">Registrieren</a>
+            <a class="nav-link" href="register.php">Registrieren</a>
           </li>
         <?php endif; ?>
 

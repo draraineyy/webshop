@@ -5,7 +5,7 @@
   <?php if (!empty($isLoggedIn) && !empty($username)): ?>
     <h2>Herzlich Willkommen <?php echo htmlspecialchars($username); ?>.</h2>
     <?php if (!empty($lastSeenTs)): ?>
-      <p>Sie waren zuletzt am <?php echo date("d.m.Y H:i:s", (int)$lastSeenTs); ?> online.</p>
+        <p>Sie waren zuletzt am <strong><?php echo date("d.m.Y H:i:s", (int)$lastSeenTs); ?></strong> online.</p>
     <?php endif; ?>
   <?php else: ?>
     <h2>Willkommen, Besucher!</h2>
