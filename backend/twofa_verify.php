@@ -46,7 +46,7 @@ try{
     $stmt->execute([$secret, $_SESSION['user_id']]);
     unset($_SESSION['pending_2fa_secret']);
 
-    header("Location: ../frontend/account.php");
+    header("Location: ../frontend/viewaccount.php");
     exit;
 } catch (Throwable $e){
     error_log("2");
