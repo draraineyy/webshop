@@ -51,6 +51,7 @@ $csrf = $_SESSION['csrf'];
             <div class="col-md-6">
                 <label class="form-label" for="email">E-Mail (Benutzername)</label>
                 <input class="form-control" type="email" id="email" name="email" required>
+                <div id="emailFeedback" class="invalid-feedback" arialive="polite"></div>
             </div>
             
             <!--CSRF-->
@@ -64,9 +65,95 @@ $csrf = $_SESSION['csrf'];
 
         <div class="d-grid gap-2 mt-3">
             <a href="viewlogin.php">Zum Login</a>
+        </div>
 
         <script>
-            function validateRegister(){
+            (function (){
+                const form=document.getElementById('registerform');
+                const emailInput=document.getElementById('email');
+                const submitBtn=form.querySelector('button[type="submit"]');
+                const csrf=document.querySelector('input[name="csrf"]').value;
+                const emailFb=document.getElementById('emailFeedback');
+
+                let debounceTimer=null;
+                let emailAvailable=false;
+
+                function setInvalid(message){
+                    emailInput.classList.remove('is-valid');
+                    emailInput.classList.add('is-invalid');
+                    emailFb.textContent=message ||'';
+                }
+
+                function setValid(){
+                    emailInput.classList.remove('is-invalid');
+                    emailInput.classList.add('is-valid');
+                    emailFb.textContent='';
+                }
+
+                function updateSubmitState(){
+                    submitBtn.disabled=!emailAvailable;
+                }
+
+                async function checkEmailAvailability(){
+                    const email=emailInput.value.trim();
+
+                    // schnelle Client-Validierung
+                    if(email.length<5||!email.includes('@')){
+                        emailAvailable=false;
+                        setInvalid('Bitte eine gültige E-Mail angeben.');
+                        updateSubmitState();
+                        return;
+                    }
+
+                    // Anfrage absetzen
+                    try{
+                        const body=new URLSearchParams({email, csrf});
+                        const res=await fetch('../backend/check_email.php', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                            body
+                        });
+
+                        const data=await res.json();
+
+                        if(!data.ok){
+                            emailAvailable=false;
+                            setInvalid(data.message || 'Fehler bei der Prüfung.');
+                        } else if(data.exists){
+                            emailAvailable=false;
+                            setInvalid('Diese E-Mail ist bereits registriert.');
+                        } else{
+                            emailAvailable=true;
+                            setValid();
+                        }
+                    } catch (e){
+                        emailAvailable=false;
+                        setInvalid('Netzwerkfehler. Bitte später erneut versuchen.');
+                    } finally{
+                        updateSubmitState();
+                    }
+                }
+
+                //Debounced Prüfung beim Tippen
+                emailInput.addEventListener('input', ()=>{
+                    clearTimeout(debounceTimer);
+                    debounceTimer=setTimeout(checkEmailAvailability, 400);
+                });
+
+                // Finaler Submit-Guard
+                form.addEventListener('submit', (e)=>{
+                    if(!emailAvailable){
+                        e.preventDefault();
+                        setInvalid('Bitte eine gültige und verfügbare E-Mail wählen.');
+                        alert('Bitte gültige und verfügbare E-Mail eingeben.')
+                    }
+                });
+
+                //Initialzustand
+                updateSubmitState();
+            })();
+
+            /*function validateRegister(){
                 const name=document.getElementById('name').value.trim();
                 const email=document.getElementById('email').value.trim();
 
@@ -78,7 +165,7 @@ $csrf = $_SESSION['csrf'];
                     alert('Bitte eine gültige E-Mail angeben.');
                     return false;
                 }
-            }
+            }*/
         </script>
     </body>
 </html>

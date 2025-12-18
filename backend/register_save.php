@@ -13,7 +13,7 @@ if(empty($_POST['csrf'])||empty($_SESSION['csrf'])||!hash_equals($_SESSION['csrf
 
 // Eingaben einsammeln & prüfen
 $name=trim($_POST['name'] ?? '');
-$email=trim($_POST['email'] ?? '');
+$email=mb_strtolower(trim($_POST['email'] ?? ''));
 
 if(strlen($name)<2||strlen($email)<5 ||strpos($email, '@')===false){
     header("Location: ../frontend/register.php?error=invalid");
@@ -22,7 +22,7 @@ if(strlen($name)<2||strlen($email)<5 ||strpos($email, '@')===false){
 
 // E-Mail Duplikat prüfen
 try{
-    $stmt=$pdo->prepare("SELECT id FROM customer WHERE email=?");
+    $stmt=$pdo->prepare("SELECT id FROM customer WHERE LOWER(email)=?");
     $stmt->execute([$email]);
     if($stmt->fetch()){
         header("Location: ../frontend/register.php?error=exists");
