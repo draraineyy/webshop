@@ -36,11 +36,53 @@ $totalPoints = (int)$stmt->fetchColumn(); // Ergebnis als Integer
 <body>
 
   <?php 
-    // Navbar einbinden (zeigt Punkte, Online-Badge, Logout etc.)
-    include __DIR__ . "/partials/navbar.php"; 
+
     // Begrüßung einbinden (zeigt personalisierte Nachricht mit Name und letztem Login)
     include __DIR__ . "/partials/greeting.php"; 
   ?>
+
+  <!-- Navbar direkt eingebaut -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="container-fluid">
+    <!-- Logo -->
+    <a class="navbar-brand" href="../index.php">PosterShop</a>
+
+    <div class="collapse navbar-collapse">
+      <ul class="navbar-nav ms-auto">
+        <!-- Link zur Artikelübersicht -->
+        <li class="nav-item">
+          <a class="nav-link" href="viewproducts.php">Artikelübersicht</a>
+        </li>
+
+        <!-- Punkteanzeige -->
+        <li class="nav-item">
+          <span class="nav-link">Punkte: <?php echo $totalPoints; ?></span>
+        </li>
+
+        <!-- Warenkorb mit Badge -->
+        <li class="nav-item">
+          <a class="nav-link" href="viewcart.php">
+            <i class="fa-solid fa-cart-shopping"></i>
+            <span id="cartBadge" class="badge bg-danger">0</span>
+          </a>
+        </li>
+
+        <!-- Online-User Anzeige -->
+        <li class="nav-item">
+          <a class="nav-link" href="#">
+            <i class="fa-solid fa-user-group"></i>
+            <span id="onlineBadge" class="badge bg-info">0</span>
+          </a>
+        </li>
+
+        <!-- Logout -->
+        <li class="nav-item">
+          <a class="nav-link" href="viewlogout.php">Abmelden</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
 
   <!-- Carousel mit 3 Bildern -->
   <div class="container mt-4">

@@ -35,11 +35,37 @@ if ($isLoggedIn) {
  <?php
     // Partials einbinden
     // Hinweis: Pfade relativ zur index.php – passe sie an, falls deine Struktur abweicht.
-    include __DIR__ . "/frontend/partials/navbar.php";
+    
     include __DIR__ . "/frontend/partials/greeting.php";
   ?>
 
-  
+  <!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="index.php">PosterShop</a>
+    <div class="collapse navbar-collapse">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="frontend/viewproducts.php">Artikelübersicht</a></li>
+        <?php if ($isLoggedIn): ?>
+          <li class="nav-item"><span class="nav-link">Punkte: <?php echo $totalPoints; ?></span></li>
+        <?php endif; ?>
+        <li class="nav-item">
+          <a class="nav-link" href="frontend/viewcart.php">
+            <i class="fa-solid fa-cart-shopping"></i>
+            <span id="cartBadge" class="badge bg-danger">0</span>
+          </a>
+        </li>
+        <?php if ($isLoggedIn): ?>
+          <li class="nav-item"><a class="nav-link" href="frontend/viewlogout.php">Abmelden</a></li>
+        <?php else: ?>
+          <li class="nav-item"><a class="nav-link" href="frontend/viewlogin.php">Anmelden</a></li>
+          <li class="nav-item"><a class="nav-link" href="frontend/register.php">Registrieren</a></li>
+        <?php endif; ?>
+      </ul>
+    </div>
+  </div>
+</nav>
+
   <!-- Logout-Meldung -->
   <div id="logoutMessage"></div>
 
