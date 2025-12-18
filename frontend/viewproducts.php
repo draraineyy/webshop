@@ -51,13 +51,13 @@ $products = $stmt->fetchAll();
             <p class="card-text"><?php echo htmlspecialchars($product['description']); ?></p>
             <p class="card-text"><strong><?php echo number_format($product['price'], 2); ?> €</strong></p>
             <p class="card-text">Artikelnummer: <?php echo $product['number']; ?></p>
-            <p class="card-text">Lagerbestand: <?php echo $product['stock']; ?></p>
+            <p class="card-text">Lagerbestand: <span id="stock-<?php echo $product['id']; ?>"><?php echo $product['stock']; ?></span></p>
 
             <!-- Menge auswählen -->
             <div class="input-group mb-3">
               <button class="btn btn-outline-secondary" type="button" onclick="changeQuantity(<?php echo $product['id']; ?>, -1)">-</button>
-              <input type="number" id="qty-<?php echo $product['id']; ?>" class="form-control text-center" value="1" min="1">
-              <button class="btn btn-outline-secondary" type="button" onclick="changeQuantity(<?php echo $product['id']; ?>, 1)">+</button>
+              <input type="number" id="qty-<?php echo $product['id']; ?>" class="form-control text-center" value="1" min="1" max="<?php echo $product['stock']; ?>">
+              <button class="btn btn-outline-secondary" type="button" onclick="changeQuantity(<?php echo $product['id']; ?>, 1, <?php echo $product['stock']; ?>)">+</button>
             </div>
 
             <!-- In den Warenkorb -->
@@ -74,10 +74,11 @@ $products = $stmt->fetchAll();
 <script src="js/cart.js"></script>
 <script>
 // Menge ändern
-function changeQuantity(productId, delta) {
+function changeQuantity(productId, delta, maxStock) {
   let inputField = document.getElementById("qty-" + productId);
   let newValue = parseInt(inputField.value) + delta;
   if (newValue < 1) newValue = 1;
+  if (newValue > maxStock) newValue = maxStock; // Begrenzung auf Lagerbestand
   inputField.value = newValue;
 }
 
@@ -106,24 +107,9 @@ function updateCartBadge() {
     });
 }
 
-function updateCartBadge() {
-  fetch("../backend/cartController.php?action=count&ts=" + Date.now())
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById("cartBadge").innerText = data.count;
-    });
-}
 
-function updateCartBadge() {
-  fetch("../backend/cartController.php?action=count&ts=" + Date.now())
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById("cartBadge").innerText = data.count;
-    });
-}
 //wird jedes Mal beim öffnen einer Seite oder zurückgehen zu einer Seite ausgeführt
 window.addEventListener("pageshow", updateCartBadge);
-
 
 </script>
 

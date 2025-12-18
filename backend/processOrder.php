@@ -48,17 +48,22 @@ try {
     $orderId = $pdo->lastInsertId();
 
     $orderSum = 0.0;
-
+    //für jede Position der Bestellung durchlaufen
     foreach ($items as $productId => $quantity) {
         $basePrice = $prices[$productId];
         $discount = $cart->getDiscount($quantity);
         $unitPrice = round($basePrice * (1 - $discount), 2);
         $positionTotal = $unitPrice * $quantity;
         $orderSum += $positionTotal;
-
+        //Position speichern
         $stmtPos = $pdo->prepare("INSERT INTO order_position (order_id, product_id, quantity, price, discount)
                                   VALUES (?, ?, ?, ?, ?)");
         $stmtPos->execute([$orderId, $productId, $quantity, $unitPrice, $discount]);
+
+        //Lagerbestand reduzieren
+        $stmtStock = $pdo->prepare("UPDATE products SET stock = stock - ? WHERE id = ?");
+        $stmtStock->execute([$quantity, $productId]);
+
     }
 
     // --- Gutscheincode prüfen ---
@@ -86,8 +91,12 @@ $pdo->prepare("UPDATE orders SET sum=? WHERE id=?")->execute([$orderSum, $orderI
     $cart->clear();
     $pdo->commit();
 
+
+    // Weiterleitung auf Danke-Seite
     header("Location: ../frontend/thankyou.php?order=" . urlencode($orderNumber));
     exit;
+
+    
 } catch (Exception $e) {
     $pdo->rollBack();
     die("Bestellung fehlgeschlagen: " . $e->getMessage());
