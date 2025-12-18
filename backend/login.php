@@ -34,7 +34,7 @@ if(!$user||!password_verify($password, $user['password_hash'])){
 
 // First-Login erzwingen
 if(!empty($user['must_change_password']) && (int)$user['must_change_password']===1){
-    $_SESSION["user_id"]=$user["id"];
+    $_SESSION["customer_id"]=$user["id"];
     $_SESSION["username"]=$user["email"];
     $_SESSION["time"]=time();
     session_regenerate_id(true);
@@ -72,7 +72,7 @@ if(preg_match('/^\d{6}$/', $code)){
 }
 
 // Session setzen
-$_SESSION["user_id"]=$user["id"];
+$_SESSION["customer_id"]=$user["id"];
 $_SESSION["username"]=$user["email"];
 $_SESSION["time"]=time();
 session_regenerate_id(true);

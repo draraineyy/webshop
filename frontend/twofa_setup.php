@@ -1,6 +1,6 @@
 <?php
 session_start();
-if(!isset($_SESSION['user_id']))
+if(!isset($_SESSION['customer_id']))
 {
     header("Location: viewlogin.php");
     exit;
@@ -11,7 +11,7 @@ require_once("../db.php");
 
 // User laden
 $stmt=$pdo->prepare("SELECT email, twofacode FROM customer WHERE id=?");
-$stmt->execute([$_SESSION['user_id']]);
+$stmt->execute([$_SESSION['customer_id']]);
 $user=$stmt->fetch();
 
 if(!$user){
