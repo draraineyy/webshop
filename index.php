@@ -32,13 +32,6 @@ if ($isLoggedIn) {
 </head>
 <body>
 
- <?php
-    // Partials einbinden
-    // Hinweis: Pfade relativ zur index.php – passe sie an, falls deine Struktur abweicht.
-    
-    include __DIR__ . "/frontend/partials/greeting.php";
-  ?>
-
   <!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <div class="container-fluid">
@@ -65,6 +58,14 @@ if ($isLoggedIn) {
     </div>
   </div>
 </nav>
+
+ <?php
+    // Partials einbinden
+    // Hinweis: Pfade relativ zur index.php – passe sie an, falls deine Struktur abweicht.
+    
+    include __DIR__ . "/frontend/partials/greeting.php";
+  ?>
+
 
   <!-- Logout-Meldung -->
   <div id="logoutMessage"></div>

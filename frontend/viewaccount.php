@@ -35,12 +35,6 @@ $totalPoints = (int)$stmt->fetchColumn(); // Ergebnis als Integer
 </head>
 <body>
 
-  <?php 
-
-    // Begrüßung einbinden (zeigt personalisierte Nachricht mit Name und letztem Login)
-    include __DIR__ . "/partials/greeting.php"; 
-  ?>
-
   <!-- Navbar direkt eingebaut -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <div class="container-fluid">
@@ -84,6 +78,12 @@ $totalPoints = (int)$stmt->fetchColumn(); // Ergebnis als Integer
   </div>
 </nav>
 
+<?php 
+
+    // Begrüßung einbinden (zeigt personalisierte Nachricht mit Name und letztem Login)
+    include __DIR__ . "/partials/greeting.php"; 
+  ?>
+
   <!-- Carousel mit 3 Bildern -->
   <div class="container mt-4">
     <div id="posterCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="3000">
@@ -119,7 +119,7 @@ $totalPoints = (int)$stmt->fetchColumn(); // Ergebnis als Integer
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
   <!-- Eigenes JS -->
-  <script src="../js/main.js"></script>
+  <script src="js/cart.js"></script>
 
   <script>
     // Warenkorb-Badge aktualisieren
@@ -138,7 +138,7 @@ $totalPoints = (int)$stmt->fetchColumn(); // Ergebnis als Integer
     // Online-Status aktualisieren
     const ONLINE_POLL_INTERVAL = 20000; // alle 20 Sekunden
     function updateOnlineBadge() {
-      fetch("../backend/status/onlineHeartbeat.php?ts=" + Date.now()) // Heartbeat-Endpunkt aufrufen
+      fetch("/webshop/backend/status/onlineHeartbeat.php?ts=" + Date.now()) // Heartbeat-Endpunkt aufrufen
         .then(res => res.json()) // Antwort als JSON parsen
         .then(data => {
           const el = document.getElementById("onlineBadge"); // Badge-Element holen
