@@ -1,5 +1,9 @@
 <?php
 session_start();
+
+header('Content-Type: application/json; charset=utf-8');
+ini_set('display_errors', '0');
+ini_set('log_errors', '1');
 require_once("../db.php");          // DB-Verbindung
 require_once("models/cart.php");    // dein Model
 
@@ -33,7 +37,6 @@ switch ($action) {
         if ($customerId) {
             $cart->saveToDb();
         }
-    }
             
         
         echo json_encode(["success" => true, "items" => enrichItems($cart)]);

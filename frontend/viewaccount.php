@@ -43,6 +43,12 @@ $totalPoints = (int)$stmt->fetchColumn(); // Ergebnis als Integer
 
     <div class="collapse navbar-collapse">
       <ul class="navbar-nav ms-auto">
+
+        <!-- Link zu Meine Bestellungen -->
+        <li class="nav-item">
+          <a class="nav-link" href="vieworders.php">Meine Bestellungen</a>
+        </li>
+
         <!-- Link zur Artikelübersicht -->
         <li class="nav-item">
           <a class="nav-link" href="viewproducts.php">Artikelübersicht</a>

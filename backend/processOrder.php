@@ -81,12 +81,11 @@ try {
 // Endsumme inkl. Versand minus Rabatt
 $orderSum = round($orderSum + $shippingCost - $appliedDiscount, 2);
 $pdo->prepare("UPDATE orders SET sum=? WHERE id=?")->execute([$orderSum, $orderId]);
-// Endsumme inkl. Versand minus Rabatt
-//$orderSum = round($orderSum + $shippingCost - $appliedDiscount, 2);
-//$pdo->prepare("UPDATE orders SET sum=? WHERE id=?")->execute([$orderSum, $orderId]);
 
-//$orderSum = round($orderSum + $shippingCost - $appliedDiscount, 2);
-//$pdo->prepare("UPDATE orders SET sum=? WHERE id=?")->execute([$orderSum, $orderId]);
+$pointsStmt=$pdo->prepare("
+    INSERT INTO points (customer_id, activity, points, date) VALUES (?, 'Einkauf', 50, NOW())
+    ");
+$pointsStmt->execute([$_SESSION['customer_id']]);
 
 $cart->clear();
 $pdo->commit();
