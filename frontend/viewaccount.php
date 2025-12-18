@@ -1,38 +1,114 @@
 <?php
-session_start(); // Sitzung starten, damit wir auf Session-Variablen zugreifen können
+// Sitzung starten, damit wir auf Session-Variablen zugreifen können
+session_start();
 
-// Prüfen, ob User eingeloggt ist
-// Wenn keine user_id in der Session vorhanden ist → Redirect zurück zur viewlogin
+// DB-Verbindung einbinden
+require_once("../db.php");
+
+// Sicherheitscheck: Nur eingeloggte User dürfen hier rein
 if (!isset($_SESSION['user_id'])) {
     header("Location: viewlogin.php"); // Redirect zur Login-Seite
-    exit; // Script beenden, damit kein weiterer Code ausgeführt wird
+    exit; // Script beenden
 }
 
-// Begrüßung und Basis-Infos aus der Session ausgeben
-echo "<h2>Welcome to your account!</h2>"; // Überschrift
-echo "<p>User-ID: " . htmlspecialchars($_SESSION['user_id']) . "</p>"; // User-ID aus Session
-echo "<p>Email: " . htmlspecialchars($_SESSION['username'] ?? '') . "</p>"; // Email aus Session
-echo "<p>Login time: " . date("d.m.Y H:i:s", $_SESSION['time'] ?? time()) . "</p>"; // Zeitpunkt des Logins
+// Variablen für Partials vorbereiten
+$isLoggedIn = true; // Wir wissen: User ist eingeloggt
+$username   = $_SESSION['username'] ?? ''; // Name/Email aus Session
+$lastSeenTs = $_SESSION['time']     ?? null; // Zeitpunkt des letzten Logins
 
-// Datenbank einbinden, um Punkte zu laden
-require_once("../db.php"); // DB-Verbindung herstellen
-
-// Punkte summieren für den eingeloggten User
-$stmt = $pdo->prepare("SELECT COALESCE(SUM(points),0) AS total FROM points WHERE customer_id=?");
+// Punkte aus der Datenbank laden
+$stmt = $pdo->prepare("SELECT COALESCE(SUM(points),0) FROM points WHERE customer_id=?");
 $stmt->execute([$_SESSION['user_id']]);
-$totalPoints = (int)$stmt->fetchColumn();
-
-// Punkte ausgeben
-echo "<p>Total points: " . $totalPoints . "</p>";
-
-// Erfolgsmeldungen anzeigen, wenn Redirect mit GET-Parametern erfolgt ist
-if (isset($_GET['changed'])) {
-    echo "<p style='color:green'>Password successfully changed.</p>"; // Meldung nach Passwortänderung
-}
-if (isset($_GET['registered'])) {
-    echo "<p style='color:green'>Registration successful.</p>"; // Meldung nach Registrierung
-}
-
-// Weiterleitung zu logout 
-echo '<p><a href="logout.php">Logout</a></p>'; // Link zum Logout-Skript
+$totalPoints = (int)$stmt->fetchColumn(); // Ergebnis als Integer
 ?>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>PosterShop - Account</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome für Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <!-- Eigenes CSS -->
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+  <?php 
+    // Navbar einbinden (zeigt Punkte, Online-Badge, Logout etc.)
+    include __DIR__ . "/partials/navbar.php"; 
+    // Begrüßung einbinden (zeigt personalisierte Nachricht mit Name und letztem Login)
+    include __DIR__ . "/partials/greeting.php"; 
+  ?>
+
+  <!-- Carousel mit 3 Bildern -->
+  <div class="container mt-4">
+    <div id="posterCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="3000">
+      <div class="carousel-inner">
+        <!-- Erstes Bild aktiv -->
+        <div class="carousel-item active">
+          <img src="../images/tropen.png" class="d-block w-100" alt="Poster 1">
+        </div>
+        <!-- Zweites Bild -->
+        <div class="carousel-item">
+          <img src="../images/skyline.png" class="d-block w-100" alt="Poster 2">
+        </div>
+        <!-- Drittes Bild -->
+        <div class="carousel-item">
+          <img src="../images/alpen.png" class="d-block w-100" alt="Poster 3">
+        </div>
+      </div>
+
+      <!-- Steuerung: Zurück -->
+      <button class="carousel-control-prev" type="button" data-bs-target="#posterCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Zurück</span>
+      </button>
+
+      <!-- Steuerung: Weiter -->
+      <button class="carousel-control-next" type="button" data-bs-target="#posterCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Weiter</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Eigenes JS -->
+  <script src="../js/main.js"></script>
+
+  <script>
+    // Warenkorb-Badge aktualisieren
+    function updateCartBadge() {
+      fetch("../backend/cartController.php?action=count") // AJAX-Request an Controller
+        .then(res => res.json()) // Antwort als JSON parsen
+        .then(data => {
+          const el = document.getElementById("cartBadge"); // Badge-Element holen
+          if (el) el.innerText = data.count; // Zahl setzen
+        })
+        .catch(err => console.error("Fehler beim Laden des Warenkorbs:", err));
+    }
+    // Beim Anzeigen der Seite sofort laden
+    window.addEventListener("pageshow", updateCartBadge);
+
+    // Online-Status aktualisieren
+    const ONLINE_POLL_INTERVAL = 20000; // alle 20 Sekunden
+    function updateOnlineBadge() {
+      fetch("../backend/status/onlineHeartbeat.php?ts=" + Date.now()) // Heartbeat-Endpunkt aufrufen
+        .then(res => res.json()) // Antwort als JSON parsen
+        .then(data => {
+          const el = document.getElementById("onlineBadge"); // Badge-Element holen
+          if (el && data.loggedIn) el.innerText = data.count; // Zahl setzen
+        })
+        .catch(err => console.error("Fehler beim Laden des Online-Status:", err));
+    }
+    // Beim Anzeigen der Seite sofort laden
+    window.addEventListener("pageshow", updateOnlineBadge);
+    // Alle 20 Sekunden erneut laden
+    setInterval(updateOnlineBadge, ONLINE_POLL_INTERVAL);
+  </script>
+
+</body>
+</html>

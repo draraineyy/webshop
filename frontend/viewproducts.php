@@ -1,4 +1,7 @@
 <?php
+// Session starten, damit wir prüfen können ob User eingeloggt ist
+session_start();
+$isLoggedIn = isset($_SESSION['customer_id']); // Flag für Gast vs. Login
 require_once("../db.php");
 $stmt = $pdo->query("SELECT id, number, title, description, price, picture_path, stock FROM products");
 $products = $stmt->fetchAll();
@@ -20,10 +23,18 @@ $products = $stmt->fetchAll();
   <h2 class="mb-0">Unsere Poster</h2>
 
   <div>
-    <!-- Zur Startseite -->
-    <a href="../index.html" class="btn btn-outline-secondary me-2">
-      <i class="fa-solid fa-house"></i> Startseite
-    </a>
+      <?php if ($isLoggedIn): ?>
+        <!-- Eingeloggte User: Link zur Accountseite -->
+        <a href="viewaccount.php" class="btn btn-outline-secondary me-2">
+          <i class="fa-solid fa-house"></i> Mein Account
+        </a>
+      <?php else: ?>
+        <!-- Gäste: Link zur Startseite -->
+        <a href="../index.php" class="btn btn-outline-secondary me-2">
+          <i class="fa-solid fa-house"></i> Startseite
+        </a>
+      <?php endif; ?>
+
 
     <!-- Warenkorb-Button mit Badge -->
     <a class="nav-link" href="viewcart.php">

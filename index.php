@@ -1,3 +1,22 @@
+<?php
+session_start();
+
+// Status & Daten für Partials
+$isLoggedIn = isset($_SESSION['user_id']);
+$username   = $_SESSION['username'] ?? '';
+$lastSeenTs = $_SESSION['time']     ?? null;
+
+// Optional: Punkte nur laden, wenn eingeloggt (für Navbar)
+if ($isLoggedIn) {
+  require_once __DIR__ . "../db.php"; 
+  $stmt = $pdo->prepare("SELECT COALESCE(SUM(points),0) FROM points WHERE customer_id=?");
+  $stmt->execute([$_SESSION['user_id']]);
+  $totalPoints = (int)$stmt->fetchColumn();
+}
+?>
+
+
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -12,55 +31,15 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <!-- Navigationsleiste -->
-  <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <div class="container-fluid">
-      <!-- Logo / Brand -->
-      <a class="navbar-brand" href="#">PosterShop</a>
-      <div class="collapse navbar-collapse">
-        <ul class="navbar-nav ms-auto">
 
-          <!--Artikelübersicht-->
-          <li class="nav-item">
-            <a class="nav-link" href="frontend/viewproducts.php">Artikelübersicht</span></a>
-          </li>
-          <!-- Punkteanzeige -->
-          <li class="nav-item">
-            <span class="nav-link">Punkte: 0</span>
-          </li>
-          <!-- Warenkorb mit Badge -->
-          <li class="nav-item">
-            <a class="nav-link" href="frontend/viewcart.php">
-              <i class="fa-solid fa-cart-shopping"></i>
-              <span id="cartBadge" class="badge bg-danger">0</span>
-            </a>
-          </li>
-          <!-- Online-User Anzeige -->
-          <li class="nav-item">
-            <a class="nav-link" href="#">
-              <i class="fa-solid fa-user-group"></i>
-              <span id="onlineBadge" class="badge bg-info">0</span>
-            </a>
-          </li>
-          <!-- Login/Logout -->
-          <li class="nav-item">
-            <a class="nav-link" href="frontend/viewlogin.php">Anmelden</a>
-          </li>
-          <!-- Registrierung -->
-          <li class="nav-item">
-            <a class="nav-link" href="frontend/register.php">Registrieren</a>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
+ <?php
+    // Partials einbinden
+    // Hinweis: Pfade relativ zur index.php – passe sie an, falls deine Struktur abweicht.
+    include __DIR__ . "/frontend/partials/navbar.php";
+    include __DIR__ . "/frontend/partials/greeting.php";
+  ?>
 
-  <!-- Begrüßung -->
-  <div class="container mt-4">
-    <h2>Willkommen, Benutzer!</h2>
-    <p>Sie waren zuletzt online am <span id="lastLogin">Datum</span>.</p>
-  </div>
-
+  
   <!-- Logout-Meldung -->
   <div id="logoutMessage"></div>
 

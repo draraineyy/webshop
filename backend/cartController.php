@@ -18,8 +18,17 @@ switch ($action) {
         $quantity  = $_POST['quantity'] ?? 1;
         if ($productId) {
             $cart->add($productId, $quantity);
-            $cart->saveToDb(); // persistieren, falls User eingeloggt
+
+            // Für Gäste: Session speichern
+            $_SESSION['cart'][$productId] = ($_SESSION['cart'][$productId] ?? 0) + $quantity;
+
+            // Für eingeloggte User: DB speichern
+            if ($customerId) {
+                $cart->saveToDb();
+            }
         }
+            
+        
         echo json_encode(["success" => true, "items" => enrichItems($cart)]);
         break;
 
@@ -27,7 +36,14 @@ switch ($action) {
         $productId = $_POST['product_id'] ?? null;
         if ($productId) {
             $cart->remove($productId);
-            $cart->saveToDb();
+            // Gäste: Session löschen
+            unset($_SESSION['cart'][$productId]);
+
+            //für eingeloggte User
+            if ($customerId) {
+                $cart->saveToDb();
+            }
+        
         }
         echo json_encode(["success" => true, "items" => enrichItems($cart)]);
         break;
@@ -37,14 +53,36 @@ switch ($action) {
         $quantity  = $_POST['quantity'] ?? 1;
         if ($productId) {
             $cart->update($productId, $quantity);
-            $cart->saveToDb();
+
+             // Gäste: Session aktualisieren
+            $_SESSION['cart'][$productId] = $quantity;
+            //eingeloggte:
+            if ($customerId) {
+                $cart->saveToDb();
+
+            }
+
         }
         echo json_encode(["success" => true, "items" => enrichItems($cart)]);
         break;
 
     case "get":
-        echo json_encode(["items" => enrichItems($cart)]);
+        // Für Gäste: Session-Warenkorb zurückgeben
+        if (!$customerId && isset($_SESSION['cart'])) {
+            $items = $_SESSION['cart'];
+            $result = [];
+            foreach ($items as $productId => $quantity) {
+                $result[$productId] = [
+                    "quantity" => $quantity,
+                    "discount" => $cart->getDiscount($quantity)
+                ];
+            }
+            echo json_encode(["items" => $result]);
+        } else {
+            echo json_encode(["items" => enrichItems($cart)]);
+        }
         break;
+
 
     case "total": //auf preis bezogen
         $total = $cart->getTotal();
