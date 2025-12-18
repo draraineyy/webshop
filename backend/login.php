@@ -77,6 +77,10 @@ $_SESSION["username"]=$user["email"];
 $_SESSION["time"]=time();
 session_regenerate_id(true);
 
+// User als online markieren
+$stmt = $pdo->prepare("REPLACE INTO online_status (customer_id, last_seen) VALUES (?, NOW())");  // - REPLACE INTO sorgt dafür, dass entweder ein neuer Eintrag erstellt oder ein bestehender überschrieben wird (falls der User schon drinsteht). Und  NOW() setzt den aktuellen Zeitpunkt als last_seen.
+$stmt->execute([$user["id"]]); 
+
 // Punkte + Logs
 $pdo->prepare("INSERT INTO points (customer_id, activity, points, date) VALUES(?, 'Login', 5, NOW())")
     ->execute([$user["id"]]);

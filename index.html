@@ -35,6 +35,13 @@
               <span id="cartBadge" class="badge bg-danger">0</span>
             </a>
           </li>
+          <!-- Online-User Anzeige -->
+          <li class="nav-item">
+            <a class="nav-link" href="#">
+              <i class="fa-solid fa-user-group"></i>
+              <span id="onlineBadge" class="badge bg-info">0</span>
+            </a>
+          </li>
           <!-- Login/Logout -->
           <li class="nav-item">
             <a class="nav-link" href="frontend/viewlogin.php">Anmelden</a>
@@ -142,6 +149,28 @@
   }
 
   window.addEventListener("pageshow", updateCartBadge);
+
+
+  //ONLINE USER STATUS
+
+  const ONLINE_POLL_INTERVAL = 20000; // alle 20 Sekunden
+
+  function updateOnlineBadge() {
+    fetch("backend/status/onlineHeartbeat.php?ts=" + Date.now())  //AJAX Request an Heartbeat-Endpunkt im backend wie viele User aktuell in der Tabelle online_status stehen
+      .then(res => res.json()) //// Antwort als JSON parsen
+      .then(data => {
+        const el = document.getElementById("onlineBadge"); //DOM-Element mit der ID "onlineBadge" holen
+        if (el && data.loggedIn) { //// Nur wenn das Element existiert UND der User eingeloggt ist
+          el.innerText = data.count;  //die Zahl der Online‑User aufs Badge setzen
+        }
+      })
+      .catch(err => console.error("Fehler beim Laden des Online-Status:", err));
+  }
+
+  // beim Laden und regelmäßig
+  window.addEventListener("pageshow", updateOnlineBadge);
+  setInterval(updateOnlineBadge, ONLINE_POLL_INTERVAL);  //Funktion ruft alle 20s erneut auf
+
 
   </script>
 </body>

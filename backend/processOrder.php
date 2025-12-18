@@ -202,8 +202,57 @@ if($customerEmail){
             <body>
                 <div class="container">
                     <div class="card">
-                        <div class="
+                        <div class="header">
+                            cid:shoplogo
+                            <div class="brand">
+                                PosterShop
+                            </div>
+                        </div>
+                        <div class="content">
+                            <h1>Bestellbestätigung</h1>
+                            <p>Hallo {$safeName},</p>
+                            <p>Vielen Dank für deine Bestellung beim <strong>PosterShop</strong>.</p>
+                            <div class="meta">
+                                <p><strong>Bestellnummer:</strong> {$safeOrder}</p>
+                                <p><strong>Versandart:</strong> {$shippingLabel}</p>
+                                <p><strong>Versandkosten:</strong> {$shippingStr} €</p>
+                            </div>
+                            <table class="table" role="presentation">
+                                <thead>
+                                    <tr>
+                                        <th>Artikel</th>
+                                        <th style="text-align:right;">Menge</th>
+                                        <th style="text-align:right;">Preis/Stk</th>
+                                        <th style="text-align:right;">Rabatt</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {$rowsHtml}
+                                </tbody>
+                            </table>
+                            <div class="total">
+                                <div class="label">
+                                    Gesamtsumme:
+                                </div>
+                                <div class="value">
+                                    <strong>{$sumStr} €</strong>
+                                </div>
+                            </div>
+                            https://example.com/orders/{$safeOrder}Bestellung anzeigen</a>
+                        </div>
+                        <div class="footer">
+                            <p>&copy; PosterShop</p>
+                        </div>
+                    </div>
+                </div>
+            </body>
+        </html>
+        HTML;
 
+        $mail->AltBody="Bestellbestätigung {$orderNumber}\nVersand: {$shippingLabel}\nVersandkosten: {$shippingStr} €\nGesamt: {$sumStr} €";
+        $mail->send();
+    } catch (Exception $e){
+        error_log("processOrder: Mailer Error: " .$mail->ErrorInfo);
     }
 }
 
@@ -212,17 +261,9 @@ try{
     $mail->Host=getenv
 }
 
-$smtpHost='smtp.gmail.com';
-$smtpUser='postershop.info@gmail.com';
-$smtpPass='veyo lyyy twbl rhal';
-$smtpPort=587;
-
-
-
-
-    // Weiterleitung auf Danke-Seite
-    header("Location: ../frontend/thankyou.php?order=" . urlencode($orderNumber));
-    exit;
+// Weiterleitung auf Danke-Seite
+header("Location: ../frontend/thankyou.php?order=" . urlencode($orderNumber));
+exit;
 
     
 } catch (Exception $e) {
