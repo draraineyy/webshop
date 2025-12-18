@@ -3,28 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <title>PosterShop - Danke</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="../public/css/style.css">
 </head>
+
 <body class="bg-light">
 
-<div class="container mt-4">
-  <!-- Überschrift -->
-  <h2 class="mb-4">Vielen Dank für Ihre Bestellung!</h2>
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-12 col-sm-10 col-md-8 col-lg-6">
 
-  <!-- Bestellnummer -->
-  <?php $order = $_GET['order'] ?? null; ?>
-  <div class="card shadow-sm p-4">
-    <?php if ($order): ?>
-      <p class="mb-3">Ihre Bestellnummer lautet: <strong><?php echo htmlspecialchars($order); ?></strong></p>
-    <?php else: ?>
-      <p class="mb-3">Bestellnummer nicht gefunden.</p>
-    <?php endif; ?>
+      <div class="card shadow-sm p-4 text-center">
+        <h2 class="mb-4">Vielen Dank für Ihre Bestellung!</h2>
 
-    <!-- Buttons -->
-    <div class="d-flex justify-content-between">
-      <a href="viewproducts.php" class="btn btn-outline-secondary">Weiter einkaufen</a>
-      <a href="viewcart.php" class="btn btn-success">Warenkorb ansehen</a>
+        <?php $order = $_GET['order'] ?? null; ?>
+        <?php if ($order): ?>
+          <p class="mb-4">
+            Ihre Bestellnummer lautet:<br>
+            <strong><?= htmlspecialchars($order) ?></strong>
+          </p>
+        <?php else: ?>
+          <p class="mb-4 text-danger">Bestellnummer nicht gefunden.</p>
+        <?php endif; ?>
+
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-between">
+          <a href="viewproducts.php" class="btn btn-outline-secondary">
+            Weiter einkaufen
+          </a>
+          <a href="viewcart.php" class="btn btn-success">
+            Warenkorb ansehen
+          </a>
+        </div>
+
+      </div>
+
     </div>
   </div>
 </div>

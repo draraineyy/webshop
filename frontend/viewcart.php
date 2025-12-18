@@ -12,6 +12,19 @@ $username   = $_SESSION['username'] ?? '';
   <title>Warenkorb</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    /* Optional: Inputs auf mobile kleiner */
+    input.form-control-sm {
+      max-width: 60px;
+    }
+    /* Kartenlayout bei mobile */
+    @media (max-width: 767px) {
+      .cart-card {
+        margin-bottom: 15px;
+        padding: 10px;
+      }
+    }
+  </style>
 </head>
 <body class="bg-light">
 
@@ -30,8 +43,8 @@ $username   = $_SESSION['username'] ?? '';
     Gesamtpreis: <span id="cart-total">0,00 €</span>
   </p>
 
-  <!-- Tabelle -->
-  <div id="cart-items" class="table-responsive"></div>
+  <!-- Container für Warenkorb-Items -->
+  <div id="cart-items"></div>
 
   <!-- Zur Kasse -->
   <div class="mt-3">
@@ -46,33 +59,45 @@ $username   = $_SESSION['username'] ?? '';
 <!-- JS -->
 <script src="js/cart.js"></script>
 <script>
-  // Warenkorb-Items darstellen
+  // Warenkorb-Items darstellen (responsive)
   function updateCartView(items) {
     const count = Object.values(items).reduce((sum, item) => sum + parseInt(item.quantity), 0);
     document.getElementById("cart-count").innerText = count;
 
-    let output = "<table class='table table-bordered'>";
-    output += "<thead><tr><th>Produkt</th><th>Menge</th><th>Rabatt</th><th>Preis/Stück</th><th>Entfernen</th></tr></thead><tbody>";
+    let output = '';
 
-    for (const [productId, item] of Object.entries(items)) {
-      let discountText = item.discount > 0 ? (item.discount * 100) + "%" : "-";
-      output += `
-        <tr>
+    if (window.innerWidth < 768) { // mobile: Kartenlayout
+      for (const [productId, item] of Object.entries(items)) {
+        let discountText = item.discount > 0 ? (item.discount * 100) + "%" : "-";
+        output += `
+          <div class="card cart-card">
+            <div><strong>Produkt:</strong> ${productId}</div>
+            <div>
+              <strong>Menge:</strong>
+              <input type="number" min="1" value="${item.quantity}"
+                     onchange="updateCart(${productId}, this.value)"
+                     class="form-control form-control-sm" style="max-width:80px;">
+            </div>
+            <div><strong>Rabatt:</strong> ${discountText}</div>
+            <div id="price-${productId}"><strong>Preis/Stück:</strong> -</div>
+            <button class="btn btn-sm btn-danger mt-2 w-100" onclick="removeFromCart(${productId})">Entfernen</button>
+          </div>`;
+      }
+    } else { // Desktop: Tabelle
+      output += `<div class="table-responsive"><table class="table table-bordered table-hover table-sm"><thead class="table-light"><tr><th>Produkt</th><th>Menge</th><th>Rabatt</th><th>Preis/Stück</th><th>Entfernen</th></tr></thead><tbody>`;
+      for (const [productId, item] of Object.entries(items)) {
+        let discountText = item.discount > 0 ? (item.discount * 100) + "%" : "-";
+        output += `<tr>
           <td>Produkt ${productId}</td>
-          <td>
-            <input type="number" min="1" value="${item.quantity}"
-                   onchange="updateCart(${productId}, this.value)"
-                   class="form-control form-control-sm" style="width:80px;">
-          </td>
+          <td><input type="number" min="1" value="${item.quantity}" onchange="updateCart(${productId}, this.value)" class="form-control form-control-sm" style="max-width:60px;"></td>
           <td>${discountText}</td>
           <td id="price-${productId}">-</td>
-          <td>
-            <button class="btn btn-sm btn-danger" onclick="removeFromCart(${productId})">X</button>
-          </td>
+          <td><button class="btn btn-sm btn-danger w-100" onclick="removeFromCart(${productId})"><i class="fa-solid fa-trash"></i></button></td>
         </tr>`;
+      }
+      output += `</tbody></table></div>`;
     }
 
-    output += "</tbody></table>";
     document.getElementById("cart-items").innerHTML = output;
 
     // Preise nachladen
@@ -105,6 +130,11 @@ $username   = $_SESSION['username'] ?? '';
         document.getElementById("price-" + productId).innerText = data.price + " €";
       });
   }
+
+  // Fenstergröße überwachen für dynamisches Umschalten zwischen Tabelle/Karten
+  window.addEventListener("resize", () => {
+    getCart(); // einfach alle Items neu rendern
+  });
 </script>
 
 </body>
