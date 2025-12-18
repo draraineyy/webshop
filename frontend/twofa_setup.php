@@ -15,7 +15,7 @@ $stmt->execute([$_SESSION['user_id']]);
 $user=$stmt->fetch();
 
 if(!$user){
-    header("Location: account.php");
+    header("Location: viewaccount.php");
     exit;
 }
 
