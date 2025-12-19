@@ -82,7 +82,7 @@ $totalPoints = (int)$stmt->fetchColumn();
         </li>
 
         <li class="nav-item">
-          <span class="nav-link">Punkte: <?= $totalPoints ?></span>
+          <a class="nav-link" href="viewpoints.php">Punkte: <?= $totalPoints ?></a>
         </li>
 
         <li class="nav-item position-relative">
