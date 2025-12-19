@@ -2,6 +2,7 @@
 session_start();
 require_once("../db.php");
 
+// Login prüfen
 if (!isset($_SESSION['customer_id'])) {
     header("Location: viewlogin.php");
     exit;
@@ -11,7 +12,7 @@ $isLoggedIn = true;
 $username   = $_SESSION['username'] ?? '';
 $lastSeenTs = $_SESSION['time'] ?? null;
 
-// Punkte abfragen
+// Punkte laden
 $stmt = $pdo->prepare("SELECT COALESCE(SUM(points),0) FROM points WHERE customer_id=?");
 $stmt->execute([$_SESSION['customer_id']]);
 $totalPoints = (int)$stmt->fetchColumn();
@@ -23,51 +24,49 @@ $totalPoints = (int)$stmt->fetchColumn();
   <title>PosterShop - Account</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Bootstrap CSS -->
+  <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="../css/style.css">
 
   <style>
-    /* Navbar etwas nach unten schieben, damit Badges nicht abgeschnitten werden */
-    .navbar {
-        padding-top: 0.5rem;
-        padding-bottom: 0.5rem;
+    /* Icon + Badge nebeneinander */
+    .navbar .nav-link i {
+        font-size: 1.2rem;
+        margin-right: 4px;
     }
 
-    /* Badges über Icons positionieren */
-    .navbar .nav-item.position-relative .badge {
-        position: absolute;
-        top: 0;
-        right: 0;
-        transform: translate(50%, -50%);
+    .navbar .badge {
+        position: static !important;
+        transform: none !important;
         font-size: 0.75rem;
-        min-width: 1.2rem;
-        height: 1.2rem;
-        padding: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        padding: 3px 6px;
+        margin-left: 2px;
     }
 
-    /* Navbar auf kleinen Bildschirmen etwas größer */
+    /* Mobile */
     @media (max-width: 576px) {
-        .navbar {
-            padding-top: 0.75rem;
-            padding-bottom: 0.75rem;
+        .navbar .nav-link i {
+            font-size: 1.4rem;
+        }
+        .navbar .badge {
+            font-size: 0.85rem;
+            padding: 4px 7px;
         }
     }
   </style>
 </head>
+
 <body class="bg-light">
 
-<!-- Navbar -->
+<!-- NAVBAR -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <div class="container-fluid">
+
     <a class="navbar-brand" href="../index.php">PosterShop</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
-            aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+      <span class="navbar-toggler-icon"></span>
     </button>
 
     <div class="collapse navbar-collapse" id="navbarContent">
@@ -85,17 +84,19 @@ $totalPoints = (int)$stmt->fetchColumn();
           <span class="nav-link">Punkte: <?= $totalPoints ?></span>
         </li>
 
-        <li class="nav-item position-relative">
-          <a class="nav-link" href="viewcart.php">
+        <!-- Warenkorb -->
+        <li class="nav-item">
+          <a class="nav-link d-flex align-items-center" href="viewcart.php">
             <i class="fa-solid fa-cart-shopping"></i>
-            <span id="cartBadge" class="badge rounded-pill bg-danger">0</span>
+            <span id="cartBadge" class="badge bg-danger">0</span>
           </a>
         </li>
 
-        <li class="nav-item position-relative">
-          <a class="nav-link" href="#">
+        <!-- Online-User -->
+        <li class="nav-item">
+          <a class="nav-link d-flex align-items-center" href="#">
             <i class="fa-solid fa-user-group"></i>
-            <span id="onlineBadge" class="badge rounded-pill bg-info">0</span>
+            <span id="onlineBadge" class="badge bg-info">0</span>
           </a>
         </li>
 
@@ -105,67 +106,89 @@ $totalPoints = (int)$stmt->fetchColumn();
 
       </ul>
     </div>
+
   </div>
 </nav>
 
 <!-- Begrüßung -->
 <?php include __DIR__ . "/partials/greeting.php"; ?>
 
-<!-- Carousel -->
+<!-- CAROUSEL (Slides only) -->
 <div class="container mt-4">
-    <div id="posterCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="3000">
-        <div class="carousel-inner">
-            <div class="carousel-item active">
-                <img src="../images/tropen.png" class="d-block w-100" alt="Poster 1">
-            </div>
-            <div class="carousel-item">
-                <img src="../images/skyline.png" class="d-block w-100" alt="Poster 2">
-            </div>
-            <div class="carousel-item">
-                <img src="../images/alpen.png" class="d-block w-100" alt="Poster 3">
-            </div>
-        </div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#posterCarousel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Zurück</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#posterCarousel" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Weiter</span>
-        </button>
+  <div id="carouselAccount" class="carousel slide" data-bs-ride="carousel" data-bs-interval="2000">
+    <div class="carousel-inner">
+
+      <div class="carousel-item active">
+        <img src="../images/tropen.png" class="d-block w-100" alt="Poster 1">
+      </div>
+
+      <div class="carousel-item">
+        <img src="../images/skyline.png" class="d-block w-100" alt="Poster 2">
+      </div>
+
+      <div class="carousel-item">
+        <img src="../images/alpen.png" class="d-block w-100" alt="Poster 3">
+      </div>
+
     </div>
+  </div>
 </div>
 
-<!-- Bootstrap JS -->
+<!-- Über uns -->
+<div class="container mt-4">
+  <div class="p-4 bg-white rounded shadow-sm">
+    <h3 class="mb-3">Willkommen im PosterShop</h3>
+    <p>
+      Hinter diesem Shop stehen wir – zwei Wirtschaftsinformatik-Studentinnen mit dem Wunsch, neben dem Studium ein
+      eigenes Herzensprojekt aufzubauen. Unsere Leidenschaft für Fotografie, Farben und besondere Momente hat uns dazu
+      gebracht, PosterShop ins Leben zu rufen.
+    </p>
+    <p>
+      Dass du hier eingeloggt bist, bedeutet uns viel. Du unterstützt nicht nur ein kleines, wachsendes Projekt,
+      sondern auch zwei junge Frauen, die ihre Vision Schritt für Schritt Realität werden lassen.
+    </p>
+  </div>
+</div>
+
+<!-- JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="js/cart.js"></script>
 
 <script>
-  // Warenkorb-Badge aktualisieren
+  // Carousel sicher initialisieren
+  document.addEventListener("DOMContentLoaded", function () {
+      var myCarousel = document.querySelector('#carouselAccount');
+      new bootstrap.Carousel(myCarousel, {
+          interval: 3000,
+          ride: 'carousel',
+          wrap: true
+      });
+  });
+
+  // Warenkorb-Badge
   function updateCartBadge() {
     fetch("../backend/cartController.php?action=count")
       .then(res => res.json())
       .then(data => {
         const el = document.getElementById("cartBadge");
-        if(el) el.innerText = data.count;
-      })
-      .catch(err => console.error(err));
+        if (el) el.innerText = data.count;
+      });
   }
   window.addEventListener("pageshow", updateCartBadge);
 
   // Online-Status
-  const ONLINE_POLL_INTERVAL = 20000;
   function updateOnlineBadge() {
-    fetch("/webshop/backend/status/onlineHeartbeat.php?ts=" + Date.now())
+    fetch("/webshop/backend/status/onlineHeartbeat.php?ts=" + Date.now(), {
+        credentials: "include"
+    })
       .then(res => res.json())
       .then(data => {
         const el = document.getElementById("onlineBadge");
-        if(el && data.loggedIn) el.innerText = data.count;
-      })
-      .catch(err => console.error(err));
+        if (el && data.loggedIn) el.innerText = data.count;
+      });
   }
   window.addEventListener("pageshow", updateOnlineBadge);
-  setInterval(updateOnlineBadge, ONLINE_POLL_INTERVAL);
+  setInterval(updateOnlineBadge, 20000);
 </script>
 
 </body>

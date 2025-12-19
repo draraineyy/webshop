@@ -2,7 +2,9 @@
 .carousel-inner {
     background-color: #fff;
 }
-
+.carousel-item {
+    background-color: #ffffff;
+}
 .carousel-item {
   height: 400px;
 }
