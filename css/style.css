@@ -53,3 +53,99 @@
 .badge-delivery {
   background:#0ea5e9;
 }
+
+.order-card {
+  margin-bottom: 1.5rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  padding: 1rem;
+}
+
+.order-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  }
+
+.order-body {
+  border-top: 1px solid #eee;
+  padding-top: 0.75rem;
+}
+
+.pos-item-order{
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.pos-item-order img {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-right: 0.75rem;
+}
+
+.badge-delivery-order {
+  background-color: #17a2b8;
+  color: #fff;
+  font-size: 0.75rem;
+  padding: 0.35em 0.5em;
+  border-radius: 0.25rem;
+}
+
+@media (max-width: 576px) {
+  .order-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .order-header div {
+    margin-bottom: 0.5rem;
+  }
+  .pos-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .pos-item img {
+    margin-bottom: 0.5rem;
+  }
+}
+
+.points-card {
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+  box-shadow:0 2px 6px rgba(0,0,0,.06);
+}
+
+.points-pos {
+  color:#047857;
+  font-weight:600;
+}
+
+.points-neg {
+  color:#b91c1c;
+  font-weight:600;
+}
+
+.stat-pill {
+  padding:.35rem .6rem;
+  border-radius:999px;
+  background:#f3f4f6;
+}
+
+.table thead th {
+  white-space:nowrap;
+}
+
+.table td, .table th{
+  word-break:break-word;
+}
+
+@media(max-width: 576px){
+  .table td first-child, .table th:first-child {
+    font-size: 0.95rem;
+  }
+}

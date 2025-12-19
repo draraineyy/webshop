@@ -47,7 +47,7 @@ function loadPositions(PDO $pdo, int $orderId): array{
     <link rel="stylesheet" href="../css/style.css">
 
     <style>
-        .order-card {
+        /*.order-card {
             margin-bottom: 1.5rem;
             border: 1px solid #ddd;
             border-radius: 8px;
@@ -99,7 +99,7 @@ function loadPositions(PDO $pdo, int $orderId): array{
             .pos-item img {
                 margin-bottom: 0.5rem;
             }
-        }
+        }*/
     </style>
 </head>
 <body class="bg-light">
