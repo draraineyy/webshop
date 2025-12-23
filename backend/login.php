@@ -7,11 +7,17 @@ session_start();
 
 require_once("../db.php"); // DB-Verbindung
 
+//Sicherheit: Exceptions bei PDO
+$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
+function redirect($url, $code=302){
+    header("Location: $url", true, $code);
+    exit;
+}
 
+//Eingaben
 $email = $_POST["email"]??'';
 $password=$_POST["password"]??'';
-//password_verify($password, $user['password_hash']);
 $code = $_POST["code"]??'';
 $resolution=$_POST["resolution"]??'unknown';
 $clientOS=$_POST["client_os"]??'Unknown';
@@ -23,7 +29,7 @@ if(strlen($email)<5||strpos($email, '@')===false||strlen($password)<1){
 }
 
 //User nur nach E-Mail laden
-$stmt = $pdo->prepare("SELECT id, email, password_hash, must_change_password, twofacode FROM customer WHERE email=?");
+$stmt = $pdo->prepare("SELECT id, email, password_hash, must_change_password, twofacode FROM customer WHERE LOWER(email)=LOWER(?)");
 $stmt->execute([$email]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 //Passwort prüfen
@@ -32,43 +38,22 @@ if(!$user||!password_verify($password, $user['password_hash'])){
     exit;
 }
 
-// First-Login erzwingen
-if(!empty($user['must_change_password']) && (int)$user['must_change_password']===1){
-    $_SESSION["customer_id"]=$user["id"];
-    $_SESSION["username"]=$user["email"];
-    $_SESSION["time"]=time();
-    session_regenerate_id(true);
-    
-    header("Location: ../frontend/first_login.php");
-    exit;
-}
+//2FA erzwingen, wenn Secret vorhanden
+$twofaSecret=trim((string)($user["twofacode"]??''));
 
-//Zwangsweiterleitung: Hat der Nutzer KEIN 2FA-Secret?
-$twofaSecret=$user["twofacode"]??'';
-if(empty($twofaSecret)){
-    //Noch kein TOTP eingerichtet -> zwinge ins Setup
-    $_SESSION["pending_2fa_user_id"]=$user["id"];
-    $_SESSION["pending_2fa_email"]=$user["email"];
-    session_regenerate_id(true);
-    header("Location: ../frontend/twofa_setup.php");
-    exit;
-}
-
-// 2FA prüfen
-require_once("PHPGangsta/GoogleAuthenticator.php");
+require_once(__DIR__ . "/PHPGangsta/GoogleAuthenticator.php");
 $ga=new PHPGangsta_GoogleAuthenticator();
-if(preg_match('/^\d{6}$/', $code)){
+
+if($twofaSecret !== ''){
+    //Secret existiert -> Code MUSS vorliegen und gültig sein
+    if(!preg_match('/^\d{6}$/', $code)){
+        redirect("../frontend/viewlogin.php?need2fa=1");
+    }
     $isValidTOTP=$ga->verifyCode($twofaSecret, $code, 2);
     if(!$isValidTOTP){
         header("Location: ../frontend/viewlogin.php?error=2fa");
         exit;
     }
-} else{
-    $_SESSION["pending_2fa_user_id"]=$user["id"];
-    $_SESSION["pending_2fa_email"]=$user["email"];
-    session_regenerate_id(true);
-    header("Location: ../frontend/twofa_setup.php");
-    exit;
 }
 
 // Session setzen
@@ -87,6 +72,26 @@ $pdo->prepare("INSERT INTO points (customer_id, activity, points, date) VALUES(?
 
 $pdo->prepare("INSERT INTO logs (customer_id, login_date, operating_system, aufloesung) VALUES (?, NOW(), ?, ?)")
     ->execute([$user["id"], $clientOS, $resolution]);
+
+// First-Login erzwingen
+if(!empty($user['must_change_password']) && (int)$user['must_change_password']===1){
+    $_SESSION["customer_id"]=$user["id"];
+    $_SESSION["username"]=$user["email"];
+    $_SESSION["time"]=time();
+    session_regenerate_id(true);
+    
+    header("Location: ../frontend/first_login.php");
+    exit;
+}
+
+//Noch kein TOTP eingerichtet -> zwinge ins Setup
+if($twofaSecret==''){
+    $_SESSION["pending_2fa_user_id"]=$user["id"];
+    $_SESSION["pending_2fa_email"]=$user["email"];
+    session_regenerate_id(true);
+    header("Location: ../frontend/twofa_setup.php");
+    exit;
+}
 
 // Weiter ins Konto
 header("Location: ../frontend/viewaccount.php");

@@ -1,3 +1,38 @@
+<?php
+session_start();
+if(!isset($_SESSION['customer_id'])){
+    header("Location: viewlogin.php");
+    exit;
+}
+
+require_once("../db.php");
+$stmt=$pdo->prepare("SELECT email, twofacode FROM customer WHERE id=?");
+$stmt->execute([$_SESSION['customer_id']]);
+$user=$stmt->fetch(PDO::FETCH_ASSOC);
+if(!$user){
+    header("Location: viewaccount.php");
+    exit;
+}
+if(!empty($user['twofacode'])){
+    header("Location: viewaccount.php");
+    exit;
+}
+
+require_once("../backend/PHPGangsta/GoogleAuthenticator.php");
+$ga=new PHPGangsta_GoogleAuthenticator();
+
+$secret=$_SESSION['pending_2fa_secret']?? $ga->createSecret();
+$_SESSION['pending_2fa_secret']=$secret;
+
+$issuer='PosterShop';
+$qrUrl=$ga->getQRCodeGoogleUrl($user['email'], $secret, $issuer);
+
+if(empty($_SESSION['csrf'])){
+    $_SESSION['csrf']=bin2hex(random_bytes(32));
+}
+$csrf=$_SESSION['csrf'];
+?>
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -22,6 +57,7 @@
                     src="<?= htmlspecialchars($qrUrl, ENT_QUOTES, 'UTF-8')?>"
                     alt="2FA QR"
                     class="img-fluid mb-3"
+                    width="180"
                 />
 
                 <p class="text-start">2. Gib einen aktuellen 6-stelligen Code aus der App ein, um die Einrichtung zu bestätigen:</p>

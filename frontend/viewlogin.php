@@ -49,7 +49,7 @@
     <h2 class="h4 mb-3 text-center">Login</h2>
     <p class="text-muted mb-4 text-center">Mit E-Mail, Passwort und ggf. 2FA-Code anmelden.</p>
 
-    <form id="loginForm" method="POST" action="../backend/login.php" onsubmit="handleLogin(event)">
+    <form id="loginForm" method="POST" action="../backend/login.php" onsubmit="return handleLogin(event)">
       <!-- E-Mail -->
       <div class="mb-3">
         <label for="email" class="form-label">Benutzername (E-Mail)</label>
@@ -61,6 +61,10 @@
         <label for="password" class="form-label">Passwort</label>
         <input type="password" class="form-control" id="password" name="password" required>
         <div class="form-text">Mindestens 9 Zeichen, Groß-/Kleinbuchstaben und Zahl.</div>
+      </div>
+
+      <div id="twofaNotice" class="alert alert-warning d-none" role="alert">
+        2FA ist für dein Konto aktiviert. Bitte gib den 6-stelligen Code aus deiner Authenticator-App ein.
       </div>
 
       <!-- 2FA-Code -->
@@ -81,6 +85,9 @@
 
     <div class="d-grid gap-2 mt-3 text-center">
         <a href="register.php">Neu registrieren</a>
+    </div>
+    <div class="d-grid gap-2 mt-3 text-center">
+      <a href="forgot.php">Passwort vergessen</a>
     </div>
   </div>
 
@@ -119,7 +126,7 @@
     }
 
     async function handleLogin(e){
-      e.preventDefault();
+      //e.preventDefault();
       if(!validateForm()) return false;
 
       document.getElementById("resolution").value = `${window.screen.width}x${window.screen.height}`;
@@ -127,6 +134,27 @@
 
       e.target.submit();
     }
+
+    
+ function getParam(name){
+    const params = new URLSearchParams(window.location.search);
+    return params.get(name);
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    // Wenn Server uns mit need2fa=1 zurückgeschickt hat:
+    if (getParam('need2fa') === '1') {
+      // Info anzeigen
+      const notice = document.getElementById('twofaNotice');
+      if (notice) notice.classList.remove('d-none');
+
+      // 2FA-Feld auf required setzen
+      const codeInput = document.getElementById('code');
+      if (codeInput) {
+        codeInput.setAttribute('required', 'required');
+      }
+    }
+  });
   </script>
 </body>
 </html>

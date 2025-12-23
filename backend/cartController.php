@@ -27,13 +27,6 @@ switch ($action) {
         }
 
         $cart->add($productId, $quantity);
-        /*if ($productId>0) {
-            $cart->add($productId, $quantity);
-
-            // Für Gäste: Session speichern
-            $_SESSION['cart'][$productId] = ($_SESSION['cart'][$productId] ?? 0) + $quantity;
-
-            // Für eingeloggte User: DB speichern*/
         if ($customerId) {
             $cart->saveToDb();
         }
@@ -126,6 +119,69 @@ switch ($action) {
     }
     break;
 
+    case "list":
+        if(!$customerId){
+            $sessItems=$_SESSION['cart']??[];
+            if(empty($sessItems)){
+                echo json_encode([]);
+                break;
+            }
+            //Preise/Titel aus DB holen
+            $ids=array_map('intval', array_keys($sessItems));
+            $placeholders=implode(',', array_fill(0, count($ids),'?'));
+            $stmt=$pdo->prepare("SELECT id, title, price FROM products WHERE id IN ($placeholders)");
+            $stmt->execute($ids);
+            $rows=$stmt->fetchAll(PDO::FETCH_ASSOC);
+            $byId=[];
+            foreach($rows as$r){
+                $byId[(int)$r['id']]=$r;
+            }
+            $result=[];
+            foreach($sessItems as $productId => $qty){
+                $p=$byId[(int)$productId]??null;
+                if(!$p)continue;
+                $discount=$cart->getDiscount((int)$qty);
+                $unit=round((float)$p['price']*(1-(float)$discount), 2);
+                $result[]=[
+                    "product_id"=>(int)$productId,
+                    "title"=>(string)$p['title'],
+                    "quantity"=>(int)$qty,
+                    "discount"=>(float)$discount,
+                    "unit_price"=>(float)$unit,
+                    "position_sum"=>(float)round($unit*(int)$qty, 2)
+                ];
+            }
+            echo json_encode($result);
+            break;
+        }
+        //Eingeloggte Nutzer: aus offenem Warenkorb laden
+        $stmt=$pdo->prepare("
+            SELECT cp.product_id, cp.quantity, p.title, p.price
+            FROM cart c
+            JOIN cart_position cp ON cp.cart_id=c.id
+            JOIN products p ON p.id=cp.product_id
+            WHERE c.customer_id=? AND c.status='open'
+            ORDER BY cp.id DESC
+        ");
+        $stmt->execute([$customerId]);
+        $rows=$stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $result=[];
+        foreach($rows as $r){
+            $qty=(int)$r['quantity'];
+            $discount=$cart->getDiscount($qty);
+            $unit=round((float)$r['price']*(1-(float)$discount), 2);
+            $result[]=[
+                "product_id"=>(int)$r['product_id'],
+                "title"=>(string)$r['title'],
+                "quantity"=>$qty,
+                "discount"=>(float)$discount,
+                "unit_price"=>(float)$unit,
+                "position_sum"=>(float)round($unit * $qty, 2)
+            ];
+        }
+        echo json_encode($result);
+        break;
 
     default:
         echo json_encode(["error" => "Ungültige Aktion"]);

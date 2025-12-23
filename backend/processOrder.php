@@ -10,7 +10,7 @@ if (!isset($_SESSION['customer_id'])) {
 }
 
 // 2) Datenschutz bestätigt?
-if (!isset($_POST['privacy'])) {
+if (!isset($_POST['privacy'])) { 
     die("Bitte Datenschutzbestimmungen akzeptieren!");
 }
 
@@ -45,13 +45,13 @@ try {
     $stmt = $pdo->prepare("INSERT INTO orders (customer_id, order_number, date, delivery, sum)
                            VALUES (?, ?, NOW(), ?, 0.00)");
     $stmt->execute([$_SESSION['customer_id'], $orderNumber, $delivery]);
-    $orderId = $pdo->lastInsertId();
+    $orderId = (int)$pdo->lastInsertId();
 
     $orderSum = 0.0;
     //für jede Position der Bestellung durchlaufen
     foreach ($items as $productId => $quantity) {
-        $basePrice = $prices[$productId];
-        $discount = $cart->getDiscount($quantity);
+        $basePrice = (float)$prices[$productId];
+        $discount = (float)$cart->getDiscount($quantity);
         $unitPrice = round($basePrice * (1 - $discount), 2);
         $positionTotal = $unitPrice * $quantity;
         $orderSum += $positionTotal;
@@ -78,10 +78,35 @@ try {
         }
     }
 
-// Endsumme inkl. Versand minus Rabatt
-$orderSum = round($orderSum + $shippingCost - $appliedDiscount, 2);
+// Stammkunden-Bonus (Punkte-Einlösung)
+$EUR_PER_POINT = 0.002;
+
+//Punkte aus POST lesen
+$redeemPointsPost = (int)($_POST['loyalty_points']??0);
+$redeemValuePost = (float)($_POST['loyalty_value_eur']??0.0);
+
+//Kontostand ermitteln
+$stmtBal = $pdo->prepare("SELECT COALESCE (SUM(points), 0) FROM points WHERE customer_id = ?");
+$stmtBal->execute([$_SESSION['customer_id']]);
+$loyaltyBalance=(int)$stmtBal->fetchColumn();
+
+//Validieren
+$redeemPoints = max(0, min($redeemPointsPost, $loyaltyBalance));
+
+//Serverseitige, verlässliche Euro-Umrechnung
+$redeemValue = round($redeemPoints * $EUR_PER_POINT, 2);
+
+// Endsumme inkl. Versand minus Rabatt minus Loyalitätsrabatt
+$orderSum = round($orderSum + $shippingCost - $appliedDiscount - $redeemValue, 2);
+if ($orderSum < 0) $orderSum = 0.00;
 $pdo->prepare("UPDATE orders SET sum=? WHERE id=?")->execute([$orderSum, $orderId]);
 
+if($redeemPoints > 0){
+    $stmtRedeem = $pdo->prepare("
+    INSERT INTO points (customer_id, activity, points, date) VALUES (?, 'Einlösung', ?, NOW())
+    ");
+    $stmtRedeem->execute([$_SESSION['customer_id'], -$redeemPoints]);
+}
 $pointsStmt=$pdo->prepare("
     INSERT INTO points (customer_id, activity, points, date) VALUES (?, 'Einkauf', 50, NOW())
     ");
@@ -103,6 +128,13 @@ $stmtCust->execute([$_SESSION['customer_id']]);
 $customer=$stmtCust->fetch(PDO::FETCH_ASSOC);
 $customerEmail=$customer['email']??null;
 $customerName=$customer['name']??'';
+
+// Rechnungs-/ Lieferadresse laden
+$name = trim($_POST['name']??'');
+$street = trim($_POST['street']??'');
+$zip = trim($_POST['zip']??'');
+$city = trim($_POST['city']??'');
+$country = trim($_POST['country']??'');
 
 // Positionen für Mail laden
 $stmtPos=$pdo->prepare("SELECT op.product_id, op.quantity, op.price, op.discount, p.title
@@ -169,6 +201,11 @@ if($customerEmail){
 
         $safeName=htmlspecialchars($customerName, ENT_QUOTES, 'UTF-8');
         $safeOrder=htmlspecialchars($orderNumber, ENT_QUOTES, 'UTF-8');
+        $safeAddrName = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
+        $safeAddrStreet = htmlspecialchars($street, ENT_QUOTES, 'UTF-8');
+        $safeAddrZip = htmlspecialchars($zip, ENT_QUOTES, 'UTF-8');
+        $safeAddrCity = htmlspecialchars($city, ENT_QUOTES, 'UTF-8');
+        $safeAddrCountry = htmlspecialchars($country, ENT_QUOTES, 'UTF-8');
         $mail->Subject="Bestellbestätigung {$safeOrder} - PosterShop";
 
         //HTML
@@ -202,7 +239,6 @@ if($customerEmail){
                 <div class="container">
                     <div class="card">
                         <div class="header">
-                            <img src="cid:shoplogo">
                             <div class="brand">
                                 PosterShop
                             </div>
@@ -215,6 +251,14 @@ if($customerEmail){
                                 <p><strong>Bestellnummer:</strong> {$safeOrder}</p>
                                 <p><strong>Versandart:</strong> {$shippingLabel}</p>
                                 <p><strong>Versandkosten:</strong> {$shippingStr} €</p>
+                                <p><strong>Rechnungs-/Lieferadresse:</strong>
+                                    <div class="addr">
+                                        {$safeAddrName}<br>
+                                        {$safeAddrStreet}<br>
+                                        {$safeAddrZip} {$safeAddrCity}<br>
+                                        {$safeAddrCountry}
+                                    </div>
+                                </p>
                             </div>
                             <table class="table" role="presentation">
                                 <thead>
@@ -254,11 +298,6 @@ if($customerEmail){
         error_log("processOrder: Mailer Error: " .$mail->ErrorInfo);
     }
 }
-
-/*try{
-    $mail->isSMTP();
-    $mail->Host=getenv
-}*/
 
 // Weiterleitung auf Danke-Seite
 header("Location: ../frontend/thankyou.php?order=" . urlencode($orderNumber));

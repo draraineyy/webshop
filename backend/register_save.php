@@ -124,14 +124,108 @@ try{
         $mail->CharSet='UTF-8';
         $mail->Encoding='base64';
         $mail->Subject='Deine Registrierung beim PosterShop';
-        $mail->Body=sprintf('
-            <h2>Willkommen, %s!</h2>
-            <p>Vielen Dank für deine Registrierung beim <strong>PosterShop</strong></p>
-            <p>Dein Startpasswort lautet: <strong>%s</strong></p>
-            <p>Bitte melde dich an und ändere es beim ersten Login.</p>',
-            htmlspecialchars($name, ENT_QUOTES, 'UTF-8'),
-            htmlspecialchars($plainPassword, ENT_QUOTES, 'UTF-8')
-        );
+        $safeName=htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
+        $safePass=htmlspecialchars($plainPassword, ENT_QUOTES, 'UTF-8');
+        $mail->Body=<<<HTML
+        <!DOCTYPE html>
+        <html lang="de">
+            <head>
+                <meta charset="UTF-8">
+                <title>Registrierung bestätigt</title>
+                <style>
+                    body{
+                        margin:0;
+                        padding:0;
+                        background:#f6f7fb;
+                        color:#222;
+                        font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+                    }
+                    
+                    .container{
+                        max-width:640px;
+                        margin:0 auto;
+                        padding:24px;
+                    }
+
+                    .card{
+                        background:#fff;
+                        border:1px solid #e5e7eb;
+                        border-radius:12px;
+                        box-shadow:0 2px 6px rgba(0,0,0,.06);
+                        overflow:hidden;
+                    }
+
+                    .header{
+                        display:flex;
+                        align-items:center;
+                        gap:12px;
+                        padding:16px 20px;
+                        border-bottom:1px solid #eef0f5;
+                    }
+
+                    .content{
+                        padding:20px;
+                    }
+
+                    h1{
+                        font-size:20px;
+                        margin:0 0 8px;
+                    }
+
+                    p{
+                        margin:0 0 12px;
+                        line-height:1.5;
+                    }
+
+                    .meta{
+                        background:#fafafa;
+                        border:1px solid #eef0f5;
+                        border-radius:10px;
+                        padding:12px;
+                        margin:12px 0;
+                    }
+
+                    .btn{
+                        display:inline-block;
+                        background:#0ea5e9;
+                        color:#fff;
+                        text-decoration:none;
+                        padding:10px 14px;
+                        border-radius:8px;
+                        font-weight:600;
+                        margin-top:12px;
+                    }
+
+                    .footer{
+                        padding:16px 20px;
+                        border-top:1px solid #eef0f5;
+                        color:#6b7280;
+                        font-size:12px;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="card">
+                        <div class="content">
+                            <h1>Registrierung bestätigt</h1>
+                            <p>Hallo {$safeName},</p>
+                            <p>Vielen Dank für deine Registrierung beim <strong>PosterShop</strong>.</p>
+                            <div class="meta">
+                                <p><strong>Dein einmaliges Startpasswort:</strong>
+                                <code>{$safePass}</code></p>
+                                <p>Bitte melde dich an und ändere es beim ersten Login.</p>
+                            </div>
+                        </div>
+                        <div class="footer">
+                            <p>Diese E-Mail wurde automatisch erstellt. Bei Fragen antworte einfach auf diese Nachricht.</p>
+                            <p>&copy; PosterShop</p>
+                        </div>
+                    </div>
+                </div>
+            </body>
+        </html>
+        HTML;
         $mail->AltBody="Willkommen, {name}!\nDein Startpasswort: {$plainPassword}?n Bitte ändere es beim ersten Login.";
 
         $mail->send();
@@ -140,20 +234,6 @@ try{
         header("Location: ../frontend/register.php?ok=1&mail=fail");
         exit;
     }
-
-    // E-Mail versenden
-    /*if(sendEmail($email, $subject, $body)){
-        $_SESSION['registration_email'] = [
-            'subject' => $subject,
-            'body' => $body,
-            'email' => $email,
-            'password' => $plainPassword
-        ];
-        header("Location: ../frontend/register.php?ok=1");   
-    }
-    else{
-        header("Location: ../frontend/register.php?ok=1&mail=fail");
-    }*/
 
 // Weiter zu first-login
 header("Location: ../frontend/first_login.php");
