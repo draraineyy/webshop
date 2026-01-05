@@ -2,6 +2,7 @@
 class Cart {
     private $pdo;
     private $customerId;
+    private $cartId = null;
 
     public function __construct($pdo, $customerId = null) {
         $this->pdo = $pdo;
@@ -9,6 +10,14 @@ class Cart {
 
         if (!isset($_SESSION['cart'])) {
             $_SESSION['cart'] = [];
+        }
+
+        //Für eingeloggte Nutzer: offene cart.id ermitteln
+        if($this->customerId){
+            $stmt = $this->pdo->prepare("SELECT id FROM cart WHERE customer_id=? AND status='open' LIMIT 1");
+            $stmt->execute([$this->customerId]);
+            $id = $stmt->fetchColumn();
+            $this->cartId = $id ? (int)$id : null;
         }
     }
 
@@ -47,8 +56,43 @@ class Cart {
     return array_sum($items);       // summiert alle Mengen
 }
 
-    public function clear() {
-        $_SESSION['cart'] = [];
+    public function clear(): void {
+        if(!$this->customerId){
+            // Gäste-Warenkorb leeren
+            unset($_SESSION['cart']);
+            return;
+        }
+        
+        $this->pdo->beginTransaction();
+        try{
+            //Alle offenen Warenkörbe für den Kunden holen
+            $stmt = $this->pdo->prepare("SELECT id FROM cart WHERE customer_id=? AND status='open'");
+            $stmt->execute([$this->customerId]);
+            $openCarts = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+            if(!empty($openCarts)){
+                //Positionen löschen
+                $in = implode(',', array_fill(0, count($openCarts), '?'));
+                $del = $this->pdo->prepare("DELETE FROM cart_position WHERE cart_id IN ($in)");
+                $del->execute($openCarts);
+
+                //Warenkörbe schließen
+                $close = $this->pdo->prepare("UPDATE cart SET status='closed' WHERE id IN ($in)");
+                $close->execute($openCarts);
+            }
+
+            //Session leeren, damit Frontend und count/total konsistent sind
+            $_SESSION['cart']=[];
+
+            //interne cartId zurücksetzen
+            $this->cartId = null;
+
+            $this->pdo->commit();
+        } catch(\Throwable $e){
+            $this->pdo->rollBack();
+            error_log("Cart::clear failed: ".$e->getMessage());
+            throw $e;
+        }
     }
 
     public function getTotal() {

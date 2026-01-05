@@ -4,6 +4,28 @@ session_start(); // Session starten, damit $_SESSION verfügbar ist
 require_once("../db.php");
 require_once("models/cart.php");
 
+function generateInvoiceNumber (PDO $pdo): string{
+    $year = date ('Y');
+    $stmt = $pdo->prepare("
+        SELECT invoice_number
+        FROM invoices
+        WHERE invoice_number LIKE ?
+        ORDER BY id DESC
+        LIMIT 1
+    ");
+    $stmt->execute(["INV-{$year}-%"]);
+    $last=$stmt->fetchColumn();
+
+    $nextSeq = 1;
+    if($last){
+        $parts = explode('-', $last);
+        $seqStr = $parts[2] ?? '0';
+        $nextSeq = (int)$seqStr + 1;
+    }
+
+    return sprintf("INV-%s-%06d", $year, $nextSeq);
+}
+
 // 1) Eingeloggt?
 if (!isset($_SESSION['customer_id'])) {
     die("Bitte einloggen, um zu bestellen.");
@@ -112,8 +134,48 @@ $pointsStmt=$pdo->prepare("
     ");
 $pointsStmt->execute([$_SESSION['customer_id']]);
 
-$cart->clear();
+//Rechnung erzeugen
+$invoiceNumber = generateInvoiceNumber($pdo);
+$stmtInv = $pdo->prepare("
+    INSERT INTO invoices (order_id, invoice_number, date, sum)
+    VALUES (?, ?, NOW(), ?)
+");
+$stmtInv->execute([$orderId, $invoiceNumber, $orderSum]);
+$invoiceId = (int)$pdo->lastInsertId();
+
+//Rechnungspositionen
+$stmtOrderPos = $pdo->prepare("
+    SELECT product_id, quantity, price, discount
+    FROM order_position
+    WHERE order_id = ?
+");
+$stmtOrderPos->execute([$orderId]);
+$orderPositions = $stmtOrderPos->fetchAll(PDO::FETCH_ASSOC);
+
+$stmtInvPos = $pdo->prepare("
+    INSERT INTO invoice_position (invoice_id, product_id, quantity, price, discount)
+    VALUES(?, ?, ?, ?, ?)
+");
+foreach ($orderPositions as $pos){
+    $stmtInvPos->execute([
+        $invoiceId,
+        (int)$pos['product_id'],
+        (int)$pos['quantity'],
+        (float)$pos['price'],
+        (float)$pos['discount']
+    ]);
+}
+
+$invoiceNumberSafe = htmlspecialchars($invoiceNumber, ENT_QUOTES, 'UTF-8');
+
 $pdo->commit();
+
+try{
+    $cart->clear();
+    unset($_SESSION['cart']);
+} catch (\Throwable $e){
+    error_log("processOrder clear failed: ".$e->getMessage());
+}
 
 // Bestätigungsemail versenden
 require_once __DIR__ . '/PHPMailer/src/PHPMailer.php';
@@ -206,7 +268,7 @@ if($customerEmail){
         $safeAddrZip = htmlspecialchars($zip, ENT_QUOTES, 'UTF-8');
         $safeAddrCity = htmlspecialchars($city, ENT_QUOTES, 'UTF-8');
         $safeAddrCountry = htmlspecialchars($country, ENT_QUOTES, 'UTF-8');
-        $mail->Subject="Bestellbestätigung {$safeOrder} - PosterShop";
+        $mail->Subject="Bestellbestätigung {$safeOrder} / Rechnung {$invoiceNumberSafe} - PosterShop";
 
         //HTML
         $mail->Body=<<<HTML
@@ -249,6 +311,7 @@ if($customerEmail){
                             <p>Vielen Dank für deine Bestellung beim <strong>PosterShop</strong>.</p>
                             <div class="meta">
                                 <p><strong>Bestellnummer:</strong> {$safeOrder}</p>
+                                <p><strong>Rechnungsnummer:</strong> {$invoiceNumberSafe}</p>
                                 <p><strong>Versandart:</strong> {$shippingLabel}</p>
                                 <p><strong>Versandkosten:</strong> {$shippingStr} €</p>
                                 <p><strong>Rechnungs-/Lieferadresse:</strong>
@@ -292,7 +355,7 @@ if($customerEmail){
         </html>
         HTML;
 
-        $mail->AltBody="Bestellbestätigung {$orderNumber}\nVersand: {$shippingLabel}\nVersandkosten: {$shippingStr} €\nGesamt: {$sumStr} €";
+        $mail->AltBody="Bestellbestätigung {$orderNumber}\nRechnungsnummer: {$invoiceNumber}\nVersand: {$shippingLabel}\nVersandkosten: {$shippingStr} €\nGesamt: {$sumStr} €";
         $mail->send();
     } catch (Exception $e){
         error_log("processOrder: Mailer Error: " .$mail->ErrorInfo);
